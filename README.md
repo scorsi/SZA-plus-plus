@@ -2,7 +2,7 @@
 
 Hi and welcome to this minimalist API. The point of this API is to restrict in no way your conception or design choices.
 
-By giving a simple Module interface, we believe that every group will be able to build its own Zia and not just the Zia that our API require you to create.
+By giving a simple Module interface, we believe that every group will be able to build its own Zia and not just the Zia that our API requires you to create.
 
 ### Dependencies
 
@@ -17,7 +17,7 @@ Simply clone this repository and include the .h files in the **api** folder.
 It introduces four header files, each commented to show explicit usage :
 #### - conf.h
 Conf is a simple map used to configure your module, it is inspired by the JSON format.
-By making ConfValue a std::variant we allow user to choose themselves how they want to configure their module.
+By making ConfValue a std::variant we allow users to choose themselves how they want to configure their module.
 
 #### - net.h
 Contains :
@@ -27,8 +27,8 @@ Contains :
 #### - http.h
 Contains :
  - The HttpMessage struct, it contains the version, the headers and the packets
- - The HttpRequest struct, it inherits from HttpMessage and add a Method enum class and an Uri as a String
- - The HttpResponse struct, it inherits from HttpMessage and add a Status enum class
+ - The HttpRequest struct, it inherits from HttpMessage and adds a Method enum class and an Uri as a String
+ - The HttpResponse struct, it inherits from HttpMessage and adds a Status enum class
 
  - The **HttpDuplex** struct, it contains :
 	1. A NetInfo struct,
