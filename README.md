@@ -60,4 +60,4 @@ Absolutely no need for any complicated conception when you can just use SZA.
 
 ### Doxygen :
 
-(link)[docs/doxygen/annotated.html]
+[link](docs/doxygen/annotated.html)
