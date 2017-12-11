@@ -33,13 +33,17 @@ Contains :
  - The HttpRequest struct, it inherits from HttpMessage and add a Method enum class and an Uri as a String
  - The HttpResponse struct, it inherits from HttpMessage and add a Status enum class
 
- - The **HttpDuplex** struct, it contains a NetInfo struct, a packets vector for req and another for resp, a HttpRequest struct and a HttpResponse struct. This struct is the _core_ of our API and should be the one used during the entire processing of the request.
+ - The **HttpDuplex** struct, it contains :
+	1. A NetInfo struct,
+	2. A packets vector for req and another for resp
+	3. An HttpRequest struct and an HttpResponse struct.
+ This struct is the _core_ of our API and should be the one used during the entire processing of the request.
 ```
  - module.h
 ```markdown
  Module is the interface to use for your module, it contains two method :
  - config, it takes a const Conf& and is used to configure your module depending on the state of your Conf
- - exec, it takes an HttpDuplex and should be the method that _applies_ your module to the current HttpDuplex
+ - exec, it takes an HttpDuplex and should be the method that "applies" your module to the current HttpDuplex
 ```
 
 ### How to use it :
