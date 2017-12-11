@@ -57,3 +57,6 @@ for each request :
 ```
 
 Absolutely no need for any complicated conception when you can just use SZA.
+
+### Doxygen :
+docs/doxygen/annotated.html
