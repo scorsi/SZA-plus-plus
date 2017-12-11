@@ -34,22 +34,26 @@ Contains :
 	1. A NetInfo struct,
 	2. A packets vector for req and another for resp
 	3. An HttpRequest struct and an HttpResponse struct.
- This struct is the **_core_** of our API and should be the one used during the entire processing of the request.
+ This struct is the **core** of our API and should be the one used during the entire processing of the request.
 
 #### - module.h
  Module is the interface to use for your module, it contains two method :
  - config, it takes a const Conf& and is used to configure your module depending on the state of your Conf
- - exec, it takes an HttpDuplex and should be the method that _applies_ your module to the current HttpDuplex
+ - exec, it takes an HttpDuplex and should be the method that **applies** your module to the current HttpDuplex
 
 ### How to use it :
 
 After loading your modules, just simply use something like :
 
 ```C++
-HttpDuplex http;
-moduleReceive.exec(http);
-moduleTreatRequest.exec(http);
-moduleSend.exec(http);
+moduleReceive.config(conf);
+moduleTreatRequest.config(conf);
+moduleSend.config(conf);
+for each request :
+	HttpDuplex http;
+	moduleReceive.exec(http);
+	moduleTreatRequest.exec(http);
+	moduleSend.exec(http);
 ```
 
 Absolutely no need for any complicated conception when you can just use SZA.
