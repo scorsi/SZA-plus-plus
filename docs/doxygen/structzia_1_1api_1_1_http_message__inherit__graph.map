@@ -1,0 +1,4 @@
+<map id="zia::api::HttpMessage" name="zia::api::HttpMessage">
+<area shape="rect" id="node2" href="$structzia_1_1api_1_1_http_request.html" title="{zia::api::HttpRequest\n|+ method\l+ uri\l|}" alt="" coords="5,160,149,252"/>
+<area shape="rect" id="node3" href="$structzia_1_1api_1_1_http_response.html" title="{zia::api::HttpResponse\n|+ status\l|}" alt="" coords="173,167,328,245"/>
+</map>
