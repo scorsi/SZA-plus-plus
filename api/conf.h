@@ -6,15 +6,17 @@
 #include <vector>
 
 namespace zia::api {
-	class ConfValue;
+	struct ConfValue;
 	using ConfObject = std::map<std::string, ConfValue>;
 	using ConfArray = std::vector<ConfValue>;
 
 	/**
 	* Represents a configuration value.
 	*/
-	class ConfValue : public std::variant<ConfObject, ConfArray, std::string, long long, double, bool>
-	{};
+	struct ConfValue
+	{
+        std::variant<ConfObject, ConfArray, std::string, long long, double, bool> v;
+    };
 
 	/**
 	* Configuration (format influenced by JSON).
