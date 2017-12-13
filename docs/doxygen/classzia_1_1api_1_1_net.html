@@ -86,14 +86,14 @@ $(function() {
 Public Types</h2></td></tr>
 <tr class="memitem:a262afcad1dcd0bc86cedd01aa8e119e4"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classzia_1_1api_1_1_net.html#a262afcad1dcd0bc86cedd01aa8e119e4">Raw</a> = std::vector&lt; std::byte &gt;</td></tr>
 <tr class="separator:a262afcad1dcd0bc86cedd01aa8e119e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3022eb0ee48f689e5136fcd809a8bdca"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classzia_1_1api_1_1_net.html#a3022eb0ee48f689e5136fcd809a8bdca">Callback</a> = void(*)(<a class="el" href="classzia_1_1api_1_1_net.html#a262afcad1dcd0bc86cedd01aa8e119e4">Raw</a> req, <a class="el" href="structzia_1_1api_1_1_net_info.html">NetInfo</a> info)</td></tr>
-<tr class="separator:a3022eb0ee48f689e5136fcd809a8bdca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fcadcbae1bec988702b8664e1687ce9"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classzia_1_1api_1_1_net.html#a0fcadcbae1bec988702b8664e1687ce9">Callback</a> = std::function&lt; void(<a class="el" href="classzia_1_1api_1_1_net.html#a262afcad1dcd0bc86cedd01aa8e119e4">Raw</a>, <a class="el" href="structzia_1_1api_1_1_net_info.html">NetInfo</a>)&gt;</td></tr>
+<tr class="separator:a0fcadcbae1bec988702b8664e1687ce9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a39d1270d8e8c2f6134247c795caaf7f9"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classzia_1_1api_1_1_net.html#a39d1270d8e8c2f6134247c795caaf7f9">~Net</a> ()=default</td></tr>
 <tr class="separator:a39d1270d8e8c2f6134247c795caaf7f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85a19dd5a4f280d21a6edda14390273b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classzia_1_1api_1_1_net.html#a85a19dd5a4f280d21a6edda14390273b">run</a> (<a class="el" href="classzia_1_1api_1_1_net.html#a3022eb0ee48f689e5136fcd809a8bdca">Callback</a> cb)=0</td></tr>
+<tr class="memitem:a85a19dd5a4f280d21a6edda14390273b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classzia_1_1api_1_1_net.html#a85a19dd5a4f280d21a6edda14390273b">run</a> (<a class="el" href="classzia_1_1api_1_1_net.html#a0fcadcbae1bec988702b8664e1687ce9">Callback</a> cb)=0</td></tr>
 <tr class="separator:a85a19dd5a4f280d21a6edda14390273b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e9cd3cb0cce09794decf49ed993aeba"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classzia_1_1api_1_1_net.html#a0e9cd3cb0cce09794decf49ed993aeba">send</a> (ImplSocket *sock, <a class="el" href="classzia_1_1api_1_1_net.html#a262afcad1dcd0bc86cedd01aa8e119e4">Raw</a> resp)=0</td></tr>
 <tr class="separator:a0e9cd3cb0cce09794decf49ed993aeba"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -101,24 +101,24 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:af683969ba997851ca84ecd84af047a80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Interface for multithreaded network abstraction. Implementations must have a "create" C function returning a "Net*" (caller should use smart pointers). </p>
+<div class="textblock"><p>Interface for multithreaded network abstraction. Dynamic library implementing it must export a "create" C function returning a "Net*" (caller should use smart pointers). </p>
 
-<p class="definition">Definition at line <a class="el" href="net_8h_source.html#l00040">40</a> of file <a class="el" href="net_8h_source.html">net.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="net_8h_source.html#l00041">41</a> of file <a class="el" href="net_8h_source.html">net.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
-<a id="a3022eb0ee48f689e5136fcd809a8bdca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3022eb0ee48f689e5136fcd809a8bdca">&#9670;&nbsp;</a></span>Callback</h2>
+<a id="a0fcadcbae1bec988702b8664e1687ce9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fcadcbae1bec988702b8664e1687ce9">&#9670;&nbsp;</a></span>Callback</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="classzia_1_1api_1_1_net.html#a3022eb0ee48f689e5136fcd809a8bdca">zia::api::Net::Callback</a> =  void (*)(<a class="el" href="classzia_1_1api_1_1_net.html#a262afcad1dcd0bc86cedd01aa8e119e4">Raw</a> req, <a class="el" href="structzia_1_1api_1_1_net_info.html">NetInfo</a> info)</td>
+          <td class="memname">using <a class="el" href="classzia_1_1api_1_1_net.html#a0fcadcbae1bec988702b8664e1687ce9">zia::api::Net::Callback</a> =  std::function&lt;void(<a class="el" href="classzia_1_1api_1_1_net.html#a262afcad1dcd0bc86cedd01aa8e119e4">Raw</a>, <a class="el" href="structzia_1_1api_1_1_net_info.html">NetInfo</a>)&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 <p>Type of callback called on request. </p>
 
-<p class="definition">Definition at line <a class="el" href="net_8h_source.html#l00050">50</a> of file <a class="el" href="net_8h_source.html">net.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="net_8h_source.html#l00051">51</a> of file <a class="el" href="net_8h_source.html">net.h</a>.</p>
 
 </div>
 </div>
@@ -135,7 +135,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Type used to receive and send packets. </p>
 
-<p class="definition">Definition at line <a class="el" href="net_8h_source.html#l00045">45</a> of file <a class="el" href="net_8h_source.html">net.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="net_8h_source.html#l00046">46</a> of file <a class="el" href="net_8h_source.html">net.h</a>.</p>
 
 </div>
 </div>
@@ -178,7 +178,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual bool zia::api::Net::run </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classzia_1_1api_1_1_net.html#a3022eb0ee48f689e5136fcd809a8bdca">Callback</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classzia_1_1api_1_1_net.html#a0fcadcbae1bec988702b8664e1687ce9">Callback</a>&#160;</td>
           <td class="paramname"><em>cb</em></td><td>)</td>
           <td></td>
         </tr>
