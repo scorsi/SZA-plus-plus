@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -35,7 +36,7 @@ namespace zia::api {
 
 	/**
 	* Interface for multithreaded network abstraction.
-	* Implementations must have a "create" C function returning a "Net*" (caller should use smart pointers).
+	* Dynamic library implementing it must export a "create" C function returning a "Net*" (caller should use smart pointers).
 	*/
 	class Net {
 	public:
@@ -47,7 +48,7 @@ namespace zia::api {
 		/**
 		* Type of callback called on request.
 		*/
-		using Callback = void (*)(Raw req, NetInfo info);
+		using Callback = std::function<void(Raw, NetInfo)>;
 
 		virtual ~Net() = default;
 

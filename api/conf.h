@@ -21,7 +21,7 @@ namespace zia::api {
 	/**
 	* Configuration (format influenced by JSON).
 	* Configuration must contain:
-	*  - "modules": a list of modules name e.g. "openssl", "gzip" (extension will be appended, will be prefixed by "lib" on linux)
+	*  - "modules": a list of modules name e.g. "cgibin", "gzip", "logger" (extension will be appended, will be prefixed by "lib" on linux)
 	*  - "modules_path": a list of paths to look for modules e.g. ".", "modules"
 	*/
 	using Conf = ConfObject;

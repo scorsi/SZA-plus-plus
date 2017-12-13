@@ -6,7 +6,7 @@
 namespace zia::api {
 	/**
 	 * Interface for modules. Functions must be safe in a multithreading context.
-	 * Modules must have a "create" C function returning a "Module*" (caller should use smart pointers).
+	 * Dynamic libraries of modules must export a "create" C function returning a "Module*" (caller should use smart pointers).
 	 */
 	class Module {
 	public:
