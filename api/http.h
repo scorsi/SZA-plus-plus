@@ -66,6 +66,7 @@ namespace zia::api {
             unsupported_media_type          = 415,
             requested_range_not_satisfiable = 416,
             expectation_failed              = 417,
+            im_a_teapot                     = 418,
             internal_server_error           = 500,
             not_implemented                 = 501,
             bad_gateway                     = 502,
