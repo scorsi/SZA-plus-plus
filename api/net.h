@@ -62,7 +62,7 @@ namespace zia::api {
         * Send a response.
         * \return true on success, otherwise false
         */
-        virtual bool send(ImplSocket* sock, Raw resp) = 0;
+        virtual bool send(ImplSocket* sock, const Raw& resp) = 0;
 
         /**
         * Stop the server.
