@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['see_5fother',['see_other',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17a5b45014f69eed6fb5420e03fdcde5c4d',1,'zia::api::HttpResponse']]],
-  ['service_5funavailable',['service_unavailable',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17a512d23352b911a1e9be84b5119e39095',1,'zia::api::HttpResponse']]],
-  ['switching_5fprotocols',['switching_protocols',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17ab6f5da5e7e683947b6f2669c799a5d3b',1,'zia::api::HttpResponse']]]
+  ['see_5fother',['see_other',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72a39b394add6776d829ffea775aab8d5dc',1,'zia::api::http::common_status']]],
+  ['service_5funavailable',['service_unavailable',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72ad2ab9a733750ae7c208f0ec0f415838f',1,'zia::api::http::common_status']]],
+  ['switching_5fprotocols',['switching_protocols',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72a162a4e95d8c2a43dc7623fea79b129a8',1,'zia::api::http::common_status']]]
 ];

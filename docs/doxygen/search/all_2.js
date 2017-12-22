@@ -5,10 +5,10 @@ var searchData=
   ['conf_2eh',['conf.h',['../conf_8h.html',1,'']]],
   ['confarray',['ConfArray',['../namespacezia_1_1api.html#aecede005dd0e181c7911d253fdd203e1',1,'zia::api']]],
   ['config',['config',['../classzia_1_1api_1_1_module.html#a55067616931557451c72677e6b5aca01',1,'zia::api::Module']]],
-  ['conflict',['conflict',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17a981f1875779561e79585a2ae43a196fb',1,'zia::api::HttpResponse']]],
+  ['conflict',['conflict',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72acbf63aca3c7d8734adc5acd25582340f',1,'zia::api::http::common_status']]],
   ['confobject',['ConfObject',['../namespacezia_1_1api.html#a376ba6ab8ebe369da5e5781a895acd29',1,'zia::api']]],
   ['confvalue',['ConfValue',['../structzia_1_1api_1_1_conf_value.html',1,'zia::api']]],
-  ['connect',['connect',['../structzia_1_1api_1_1_http_request.html#ae623c6a2b6670e9a5ae489a9ba5dd03dab640a0ce465fa2a4150c36b305c1c11b',1,'zia::api::HttpRequest']]],
-  ['continue_5f',['continue_',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17a5b4404524e842940120cc65b3214d40b',1,'zia::api::HttpResponse']]],
-  ['created',['created',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17ae2fa538867c3830a859a5b17ab24644b',1,'zia::api::HttpResponse']]]
+  ['connect',['connect',['../namespacezia_1_1api_1_1http.html#a7103289c7f120ed10e6a6469d991b2ccab640a0ce465fa2a4150c36b305c1c11b',1,'zia::api::http']]],
+  ['continue_5f',['continue_',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72aa815108aceeefdb8ae183676a99e6147',1,'zia::api::http::common_status']]],
+  ['created',['created',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72aa46732b69a0148d31d58028cec0ce1b4',1,'zia::api::http::common_status']]]
 ];

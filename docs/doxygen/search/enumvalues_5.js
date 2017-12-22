@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['forbidden',['forbidden',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17a350f9d68221a0db19024ee40cfc3c7f8',1,'zia::api::HttpResponse']]],
-  ['found',['found',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17a6cfe61694ee1bb13ae719d47c2f80b7a',1,'zia::api::HttpResponse']]]
+  ['forbidden',['forbidden',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72a038753e02fddf5e18a48b0ad9c758054',1,'zia::api::http::common_status']]],
+  ['found',['found',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72aa4fc94f132fb06f75dbf229ce447d856',1,'zia::api::http::common_status']]]
 ];

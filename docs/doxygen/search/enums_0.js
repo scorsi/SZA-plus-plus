@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['method',['Method',['../structzia_1_1api_1_1_http_request.html#ae623c6a2b6670e9a5ae489a9ba5dd03d',1,'zia::api::HttpRequest']]]
+  ['method',['Method',['../namespacezia_1_1api_1_1http.html#a7103289c7f120ed10e6a6469d991b2cc',1,'zia::api::http']]]
 ];

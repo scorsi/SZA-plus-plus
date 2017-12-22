@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['unauthorized',['unauthorized',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17a36fd540552b3b1b34e8f0bd8897cbf1e',1,'zia::api::HttpResponse']]],
-  ['unknown',['unknown',['../structzia_1_1api_1_1_http_message.html#a691e636cd543b2d728d6b0f2ba3d5cebaad921d60486366258809553a3db49a4a',1,'zia::api::HttpMessage::unknown()'],['../structzia_1_1api_1_1_http_request.html#ae623c6a2b6670e9a5ae489a9ba5dd03daad921d60486366258809553a3db49a4a',1,'zia::api::HttpRequest::unknown()'],['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17aad921d60486366258809553a3db49a4a',1,'zia::api::HttpResponse::unknown()']]],
-  ['unsupported_5fmedia_5ftype',['unsupported_media_type',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17a9e6b71a081dee9f212c7d7cdffb8be13',1,'zia::api::HttpResponse']]],
+  ['unauthorized',['unauthorized',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72a20f1d6e00359bab7b7a9b67daf3057fd',1,'zia::api::http::common_status']]],
+  ['unknown',['unknown',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72a23092559e930b8df13fec8f648b4f7d3',1,'zia::api::http::common_status::unknown()'],['../namespacezia_1_1api_1_1http.html#aa3e08ff87eb9e5c4cd16a53cc781102aaad921d60486366258809553a3db49a4a',1,'zia::api::http::unknown()'],['../namespacezia_1_1api_1_1http.html#a7103289c7f120ed10e6a6469d991b2ccaad921d60486366258809553a3db49a4a',1,'zia::api::http::unknown()']]],
+  ['unsupported_5fmedia_5ftype',['unsupported_media_type',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72a4e1ad343c160e960faf748561271abd9',1,'zia::api::http::common_status']]],
   ['uri',['uri',['../structzia_1_1api_1_1_http_request.html#a1d85bdc462dbadb43428b5cbf56ce323',1,'zia::api::HttpRequest']]],
-  ['use_5fproxy',['use_proxy',['../structzia_1_1api_1_1_http_response.html#a8cfad5b652c112fb5ce8e55739c06f17a910b02467b0674ae0042a7fff67c9052',1,'zia::api::HttpResponse']]]
+  ['use_5fproxy',['use_proxy',['../namespacezia_1_1api_1_1http_1_1common__status.html#ac571a65ae7a08733fcf9573689479c72a332dcb2208c7b2016f63812aaf3279cd',1,'zia::api::http::common_status']]]
 ];
