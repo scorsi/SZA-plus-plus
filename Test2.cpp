@@ -8,7 +8,7 @@
 #include "api/pp/http.hpp"
 #include "api/pp/module.hpp"
 
-// SZA++ Module Implementation
+// SZA++ Module
 class Test1 : public zia::apipp::Module {
 public:
     ~Test1() override = default;
@@ -23,6 +23,7 @@ public:
     }
 };
 
+// Basic SZA Module
 class Test2 : public zia::api::Module {
 private:
     zia::api::Conf conf;
@@ -52,7 +53,7 @@ public:
 
 };
 
-// SZA++ Module Implementation
+// SZA++ Module
 class Test3 : public zia::apipp::Module {
 public:
     ~Test3() override = default;
@@ -87,20 +88,21 @@ void test2() {
     zia::apipp::ResponsePtr response = std::make_shared<zia::apipp::Response>(*request);
 
     for (const auto &mod: modules) {
+        {
+            // SZA/SZA++ Compliant code
+            if (auto *modpp = dynamic_cast<zia::apipp::Module *>(mod)) {
+                std::cout << "Executing a sza++ module" << std::endl;
 
-        if (auto *modpp = dynamic_cast<zia::apipp::Module *>(mod)) {
-            std::cout << "Executing a sza++ module" << std::endl;
+                modpp->smartExec(request, response, net);
+            } else {
+                std::cout << "Executing a basic module" << std::endl;
 
-            modpp->smartExec(request, response, net);
-        } else {
-            std::cout << "Executing a basic module" << std::endl;
-
-            zia::api::HttpDuplex duplex = zia::apipp::createBasicHttpDuplex(request, response, net);
-            mod->exec(duplex);
-            response = zia::apipp::Response::fromBasicHttpDuplex(duplex);
-            request = zia::apipp::Request::fromBasicHttpDuplex(duplex);
+                zia::api::HttpDuplex duplex = zia::apipp::createBasicHttpDuplex(request, response, net);
+                mod->exec(duplex);
+                response = zia::apipp::Response::fromBasicHttpDuplex(duplex);
+                request = zia::apipp::Request::fromBasicHttpDuplex(duplex);
+            }
         }
-
         std::cout << "Response:" << response->body << std::endl;
         std::cout << response->statusCode << ": " << response->statusReason << std::endl;
         for (const auto &item: response->headers) {
