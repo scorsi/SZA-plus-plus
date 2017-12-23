@@ -11,10 +11,10 @@ namespace zia::apipp {
 
     class Module : public zia::api::Module {
     protected:
-        Conf conf;
-        std::unique_ptr<Response> response;
-        std::unique_ptr<Request> request;
-        Net net;
+        Conf conf{};
+        ResponsePtr response{};
+        RequestPtr request{};
+        NetPtr net{};
 
     public:
         ~Module() override = default;
@@ -24,21 +24,48 @@ namespace zia::apipp {
             return true;
         }
 
+        void reset() {
+            // We must be sure that we correctly releasing pointers
+
+            if (this->request.unique())
+                this->request.reset();
+            else
+                this->request = {};
+
+            if (this->response.unique())
+                this->response.reset();
+            else
+                this->response = {};
+
+            if (this->net.unique())
+                this->net.reset();
+            else
+                this->net = {};
+        }
+
+        bool smartExec(RequestPtr &request, ResponsePtr &response, NetPtr &net) {
+            this->request = request;
+            this->response = response;
+            this->net = net;
+
+            auto ret = this->perform();
+
+            this->reset(); // Reset pointers.
+            return ret;
+        }
+
         bool exec(zia::api::HttpDuplex &http) override {
-            this->response = Response::fromBasicHttpResponse(http.resp);
-            this->request = Request::fromBasicHttpRequest(http.req);
+            this->response = Response::fromBasicHttpDuplex(http);
+            this->request = Request::fromBasicHttpDuplex(http);
             this->net = Net::fromBasicNetInfo(http.info);
 
             auto ret = this->perform();
 
-            http.resp = std::move(this->response->toBasicHttpResponse());
-            http.req = std::move(this->request->toBasicHttpRequest());
-            http.info = this->net.toBasicNetInfo();
+            http.resp = this->response->toBasicHttpResponse();
+            http.req = this->request->toBasicHttpRequest();
+            http.info = this->net->toBasicNetInfo();
 
-            // We must be sure that we correctly releasing pointers
-            this->response.release();
-            this->request.release();
-
+            this->reset(); // Reset pointers.
             return ret;
         }
 
