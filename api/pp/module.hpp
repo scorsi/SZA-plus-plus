@@ -21,6 +21,7 @@ namespace zia::apipp {
 
         bool config(const zia::api::Conf &conf) override {
             this->conf = Conf::fromBasicConfig(conf);
+            return true;
         }
 
         bool exec(zia::api::HttpDuplex &http) override {
