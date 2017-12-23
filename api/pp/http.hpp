@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <sstream>
 #include "../http.h"
 
 namespace zia::apipp {
@@ -18,9 +19,18 @@ namespace zia::apipp {
         int statusCode{0};
         std::string statusReason{};
 
-        Response(zia::api::http::Version &version, /*std::map<std::string, std::string> &headers,*/
+        Response(zia::api::http::Version &version, std::map<std::string, std::string> &headers,
                  zia::api::Net::Raw &rawBody, int statusCode, std::string &statusReason)
-                : version{version}, headers{}, rawBody{rawBody}, statusCode(statusCode), statusReason{statusReason} {}
+                : version{version}, rawBody{rawBody}, statusCode(statusCode), statusReason{statusReason} {
+
+            for (const auto &item : headers) {
+                std::stringstream ss(item.second);
+                std::string res;
+                while (std::getline(ss, res, ',')) {
+                    this->headers[item.first].push_back(res);
+                }
+            }
+        }
 
         Response *addHeader(const std::string &name, const std::string &value) {
             this->headers[name].push_back(value);
@@ -46,7 +56,7 @@ namespace zia::apipp {
         }
 
         static std::unique_ptr<Response> fromBasicHttpResponse(zia::api::HttpResponse &basicResponse) {
-            auto response = std::make_unique<Response>(basicResponse.version, basicResponse.body,
+            auto response = std::make_unique<Response>(basicResponse.version, basicResponse.headers, basicResponse.body,
                                                        basicResponse.status, basicResponse.reason);
 
             std::transform(basicResponse.body.begin(), basicResponse.body.end(), std::back_inserter(response->body),
@@ -56,8 +66,18 @@ namespace zia::apipp {
         }
 
         zia::api::HttpResponse toBasicHttpResponse() {
+            std::map<std::string, std::string> basicHeaders;
+
+            for (const auto &item : this->headers) {
+                for (const auto &value: item.second) {
+                    basicHeaders[item.first] += value + ", ";
+                }
+                auto &tmp = basicHeaders[item.first];
+                basicHeaders[item.first] = tmp.substr(0, tmp.length() - 2);
+            }
+
             if (this->useRawBody) {
-                return zia::api::HttpResponse{this->version, {}, this->rawBody,
+                return zia::api::HttpResponse{this->version, basicHeaders, this->rawBody,
                                               this->statusCode, this->statusReason};
             } else {
                 std::vector<std::byte> basicBody;
@@ -65,7 +85,7 @@ namespace zia::apipp {
                 std::transform(this->body.begin(), this->body.end(), std::back_inserter(basicBody),
                                [](auto c) { return static_cast<std::byte>(c); });
 
-                return zia::api::HttpResponse{this->version, {}, basicBody,
+                return zia::api::HttpResponse{this->version, basicHeaders, basicBody,
                                               this->statusCode, this->statusReason};
             }
         }
@@ -83,13 +103,22 @@ namespace zia::apipp {
         const zia::api::http::Method method;
         const std::string uri;
 
-        Request(zia::api::http::Version version, zia::api::Net::Raw &rawBody, zia::api::http::Method method,
-                std::string &uri)
-                : version{version}, rawBody{rawBody}, headers{}, method{method}, uri{uri} {}
+        Request(zia::api::http::Version version, std::map<std::string, std::string> &headers,
+                zia::api::Net::Raw &rawBody, zia::api::http::Method method, std::string &uri)
+                : version{version}, rawBody{rawBody}, headers{}, method{method}, uri{uri} {
+
+            for (const auto &item : headers) {
+                std::stringstream ss(item.second);
+                std::string res;
+                while (std::getline(ss, res, ',')) {
+                    this->headers[item.first].push_back(res);
+                }
+            }
+        }
 
         static std::unique_ptr<Request> fromBasicHttpRequest(zia::api::HttpRequest &basicRequest) {
-            auto request = std::make_unique<Request>(basicRequest.version, basicRequest.body, basicRequest.method,
-                                                     basicRequest.uri);
+            auto request = std::make_unique<Request>(basicRequest.version, basicRequest.headers, basicRequest.body,
+                                                     basicRequest.method, basicRequest.uri);
 
             std::transform(basicRequest.body.begin(), basicRequest.body.end(), std::back_inserter(request->body),
                            [](auto c) { return static_cast<char>(c); });
@@ -98,15 +127,25 @@ namespace zia::apipp {
         }
 
         zia::api::HttpRequest toBasicHttpRequest() {
+            std::map<std::string, std::string> basicHeaders;
+
+            for (const auto &item : this->headers) {
+                for (const auto &value: item.second) {
+                    basicHeaders[item.first] += value + ", ";
+                }
+                auto &tmp = basicHeaders[item.first];
+                basicHeaders[item.first] = tmp.substr(0, tmp.length() - 2);
+            }
+
             if (this->useRawBody) {
-                return zia::api::HttpRequest{this->version, {}, this->rawBody, this->method, this->uri};
+                return zia::api::HttpRequest{this->version, basicHeaders, this->rawBody, this->method, this->uri};
             } else {
                 std::vector<std::byte> basicBody;
 
                 std::transform(this->body.begin(), this->body.end(), std::back_inserter(basicBody),
                                [](auto c) { return static_cast<std::byte>(c); });
 
-                return zia::api::HttpRequest{this->version, {}, basicBody, this->method, this->uri};
+                return zia::api::HttpRequest{this->version, basicHeaders, basicBody, this->method, this->uri};
             }
         }
     };
