@@ -4,6 +4,8 @@
 #include <memory>
 #include <sstream>
 #include <utility>
+#include <algorithm>
+#include <utility>
 #include "../http.h"
 
 namespace zia::apipp {
@@ -21,8 +23,8 @@ namespace zia::apipp {
         const std::string uri;
         const zia::api::Net::Raw inputRawData{}; // Shouldn't be modified
 
-        Request(const zia::api::http::Version version, const zia::api::http::Method method, std::string uri)
-                : version{version}, method{method}, uri(std::move(uri)) {}
+        Request(const zia::api::http::Version version, const zia::api::http::Method method, std::string &&uri)
+                : version{version}, method{method}, uri(std::forward<std::string>(uri)) {}
 
         explicit Request(const zia::api::HttpDuplex &duplex)
                 : version{duplex.req.version}, rawBody{duplex.req.body},

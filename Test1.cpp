@@ -21,6 +21,8 @@ public:
                 ->addHeader("Set-Cookie", "test")
                 ->addHeader("Set-Cookie", "toto")
                 ->setStandardData("test");
+
+        return true;
     }
 };
 

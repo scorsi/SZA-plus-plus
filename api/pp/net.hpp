@@ -15,7 +15,7 @@ namespace zia::apipp {
         }
 
         zia::api::NetInfo toBasicNetInfo() const {
-
+            return zia::api::NetInfo();
         }
     };
 

@@ -1,5 +1,5 @@
 
-#pragma one
+#pragma once
 
 #include "../module.h"
 
@@ -26,21 +26,9 @@ namespace zia::apipp {
 
         void reset() {
             // We must be sure that we correctly releasing pointers
-
-            if (this->request.unique())
-                this->request.reset();
-            else
-                this->request = {};
-
-            if (this->response.unique())
-                this->response.reset();
-            else
-                this->response = {};
-
-            if (this->net.unique())
-                this->net.reset();
-            else
-                this->net = {};
+            this->request.reset();
+            this->response.reset();
+            this->net.reset();
         }
 
         bool smartExec(RequestPtr &request, ResponsePtr &response, NetPtr &net) {

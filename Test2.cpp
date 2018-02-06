@@ -20,6 +20,7 @@ public:
                 ->setStatus(42, "42 power")
                 ->addHeader("Set-Cookie", "test")
                 ->setStandardData("test");
+        return true;
     }
 };
 
@@ -66,6 +67,7 @@ public:
         this->response
                 ->addHeader("Set-Cookie", "toto")
                 ->appendStandardData("toto");
+        return true;
     }
 };
 
