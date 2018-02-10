@@ -97,6 +97,14 @@ namespace zia::apipp {
             }
         }
 
+        ConfElem *get_at(const int index) {
+            return (*this)[index];
+        }
+
+        ConfElem *get_at(const std::string &index) {
+            return (*this)[index];
+        }
+
         /**
          * Set the value into the std::variant.
          *

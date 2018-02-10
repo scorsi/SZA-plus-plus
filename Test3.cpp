@@ -23,16 +23,16 @@ void test3() {
                     ->push((new ConfElem())->set(false)));
 
     // TODO: Better getter
-    std::cout << (*conf)["string_test"]->get<std::string>() << std::endl;
-    std::cout << (*conf)["integer_test"]->get<int>() << std::endl;
-    std::cout << (*conf)["integer_test"]->get<long long>() << std::endl;
-    std::cout << (*conf)["double_test"]->get<double>() << std::endl;
-    std::cout << (*conf)["double_test"]->get<float>() << std::endl;
+    std::cout << conf->get_at("string_test")->get<std::string>() << std::endl;
+    std::cout << conf->get_at("integer_test")->get<int>() << std::endl;
+    std::cout << conf->get_at("integer_test")->get<long long>() << std::endl;
+    std::cout << conf->get_at("double_test")->get<double>() << std::endl;
+    std::cout << conf->get_at("double_test")->get<float>() << std::endl;
 
-    std::cout << (*(*conf)["nested_map_test"])["op"]->get<int>() << std::endl;
+    std::cout << conf->get_at("nested_map_test")->get_at("op")->get<int>() << std::endl;
 
-    std::cout << (*(*conf)["array_test"])[0]->get<bool>() << std::endl;
-    std::cout << (*(*conf)["array_test"])[1]->get<bool>() << std::endl;
+    std::cout << conf->get_at("array_test")->get_at(0)->get<bool>() << std::endl;
+    std::cout << conf->get_at("array_test")->get_at(1)->get<bool>() << std::endl;
 
     delete conf;
 }
