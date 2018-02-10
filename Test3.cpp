@@ -22,7 +22,6 @@ void test3() {
                     ->push((new ConfElem())->set(true))
                     ->push((new ConfElem())->set(false)));
 
-    // TODO: Better getter
     std::cout << conf->get_at("string_test")->get<std::string>() << std::endl;
     std::cout << conf->get_at("integer_test")->get<int>() << std::endl;
     std::cout << conf->get_at("integer_test")->get<long long>() << std::endl;
