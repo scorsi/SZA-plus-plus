@@ -9,28 +9,30 @@ using namespace std::literals::string_literals;
 using namespace zia::apipp;
 
 void test3() {
-    auto conf = Conf();
-    conf.set(ConfMap());
+    auto conf = (new ConfElem())
+            ->set(new ConfMap)
+            ->set_at("string_test", (new ConfElem())->set("first_value"s))
+            ->set_at("integer_test", (new ConfElem())->set(42))
+            ->set_at("double_test", (new ConfElem())->set(42.42))
+            ->set_at("nested_map_test", (new ConfElem())
+                    ->set(new ConfMap())
+                    ->set_at("op", (new ConfElem())->set(1)))
+            ->set_at("array_test", (new ConfElem())
+                    ->set(new ConfArray())
+                    ->push((new ConfElem())->set(true))
+                    ->push((new ConfElem())->set(false)));
 
-    conf.set_at("string_test", Conf().set("first_value"s));
-    conf.set_at("integer_test", Conf().set(42));
-    conf.set_at("double_test", Conf().set(42.42));
-    auto nconf = Conf().set(ConfMap());
-    nconf.set_at("op", Conf().set(1));
-    conf.set_at("nested_map_test", nconf);
+    // TODO: Better getter
+    std::cout << (*conf)["string_test"]->get<std::string>() << std::endl;
+    std::cout << (*conf)["integer_test"]->get<int>() << std::endl;
+    std::cout << (*conf)["integer_test"]->get<long long>() << std::endl;
+    std::cout << (*conf)["double_test"]->get<double>() << std::endl;
+    std::cout << (*conf)["double_test"]->get<float>() << std::endl;
 
-    conf.set_at("array_test", Conf().set(ConfArray()));
-    conf["array_test"].push(Conf().set(true));
-    conf["array_test"].push(Conf().set(false));
+    std::cout << (*(*conf)["nested_map_test"])["op"]->get<int>() << std::endl;
 
-    std::cout << conf["string_test"].get<std::string>() << std::endl;
-    std::cout << conf["integer_test"].get<int>() << std::endl;
-    std::cout << conf["integer_test"].get<long long>() << std::endl;
-    std::cout << conf["double_test"].get<double>() << std::endl;
-    std::cout << conf["double_test"].get<float>() << std::endl;
+    std::cout << (*(*conf)["array_test"])[0]->get<bool>() << std::endl;
+    std::cout << (*(*conf)["array_test"])[1]->get<bool>() << std::endl;
 
-    std::cout << conf["nested_map_test"]["op"].get<int>() << std::endl;
-
-    std::cout << conf["array_test"][0].get<bool>() << std::endl;
-    std::cout << conf["array_test"][1].get<bool>() << std::endl;
+    delete conf;
 }
