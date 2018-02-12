@@ -26,7 +26,6 @@ namespace zia::apipp {
 
         std::map<std::string, ConfElem> elems;
 
-
         // Put in the .cpp file to allow proper destructor call.
         ~ConfMap();
     };
@@ -43,7 +42,6 @@ namespace zia::apipp {
         ConfArray& operator=(ConfArray&&) = default;
 
         std::vector<ConfElem> elems;
-
 
         // Put in the .cpp file to allow proper destructor call.
         ~ConfArray();
@@ -129,7 +127,6 @@ namespace zia::apipp {
         template<typename T>
         ConfElem &&set(T &&) &&;
 
-
         /**
          * Push a ConfElem into the ConfArray value. The value is moved into the array.
          * 
@@ -161,7 +158,6 @@ namespace zia::apipp {
 		* @return
 		*/
         ConfElem &&push(ConfElem &&val) && {
-
             try {
                 std::get<ConfArray::Sptr>(value)->elems.emplace_back( std::move(val) ) ;
             } catch (std::exception &) {
@@ -180,7 +176,6 @@ namespace zia::apipp {
          * @param val
          * @return.
          */
-
         ConfElem &set_at(const std::string &index, ConfElem && val) & {
             try {
                 std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::move(val));
@@ -209,6 +204,7 @@ namespace zia::apipp {
             }
             return std::move(*this);
         }
+
 
 		/**
 		* Insert a value into the ConfMap value. Value is copied into the map element.
@@ -248,7 +244,6 @@ namespace zia::apipp {
             }
             return std::move(*this);
         }
-
 
         /**
          * Get the enum type of the variant value.
