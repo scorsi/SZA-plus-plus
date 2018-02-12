@@ -26,6 +26,7 @@ namespace zia::apipp {
 
         std::map<std::string, ConfElem> elems;
 
+
         // Put in the .cpp file to allow proper destructor call.
         ~ConfMap();
     };
@@ -42,6 +43,7 @@ namespace zia::apipp {
         ConfArray& operator=(ConfArray&&) = default;
 
         std::vector<ConfElem> elems;
+
 
         // Put in the .cpp file to allow proper destructor call.
         ~ConfArray();
@@ -109,6 +111,7 @@ namespace zia::apipp {
             return (*this)[index];
         }
 
+
         const ConfElem &get_at(const std::string &index) const {
             return (*this)[index];
         }
@@ -125,6 +128,7 @@ namespace zia::apipp {
 
         template<typename T>
         ConfElem &&set(T &&) &&;
+
 
         /**
          * Push a ConfElem into the ConfArray value. The value is moved into the array.
@@ -157,6 +161,7 @@ namespace zia::apipp {
 		* @return
 		*/
         ConfElem &&push(ConfElem &&val) && {
+
             try {
                 std::get<ConfArray::Sptr>(value)->elems.emplace_back( std::move(val) ) ;
             } catch (std::exception &) {
@@ -175,6 +180,7 @@ namespace zia::apipp {
          * @param val
          * @return.
          */
+
         ConfElem &set_at(const std::string &index, ConfElem && val) & {
             try {
                 std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::move(val));
@@ -235,6 +241,7 @@ namespace zia::apipp {
         ConfElem &&set_at(const std::string &index, ConfElem const& val) && {
             try {
                 std::get<ConfMap::Sptr>(value)->elems.emplace(index, val);
+
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -280,6 +287,7 @@ namespace zia::apipp {
         const ConfElem &operator[](const int index) const {
             try {
                 return (std::get<ConfArray::Sptr>(value))->elems.at(index);
+
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -302,6 +310,7 @@ namespace zia::apipp {
                 throw InvalidAccess();
             }
         }
+
 
 		/**
 		* Access to an index of a ConfMap.
