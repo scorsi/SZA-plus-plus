@@ -115,6 +115,8 @@ StyleCopReport.xml
 *.log
 *.vspscc
 *.vssscc
+*.vcxproj
+*.vcxproj.filters
 .builds
 *.pidb
 *.svclog
