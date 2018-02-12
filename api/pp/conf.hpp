@@ -12,9 +12,15 @@ namespace zia::apipp {
 
     class ConfElem;
 
+    template<typename T, typename U>
+    constexpr bool NonSelf()
+    {
+        using decayed = std::decay_t<T>;
+        return !std::is_same<decayed, U>::value;
+    }
+
     struct ConfMap {
 
-        using Uptr = std::unique_ptr<ConfMap>;
         using Sptr = std::shared_ptr<ConfMap>;
 
         ConfMap() = default;
@@ -24,14 +30,14 @@ namespace zia::apipp {
         ConfMap& operator=(ConfMap const&) = default;
         ConfMap& operator=(ConfMap&&) = default;
 
-        std::map<std::string, ConfElem> elems;
+
+        std::map<std::string, std::shared_ptr<ConfElem> > elems;
 
         // Put in the .cpp file to allow proper destructor call.
         ~ConfMap();
     };
 
     struct ConfArray {
-        using Uptr = std::unique_ptr<ConfArray>;
         using Sptr = std::shared_ptr<ConfArray>;
 
         ConfArray() = default;
@@ -41,7 +47,7 @@ namespace zia::apipp {
         ConfArray& operator=(ConfArray const&) = default;
         ConfArray& operator=(ConfArray&&) = default;
 
-        std::vector<ConfElem> elems;
+        std::vector<std::shared_ptr<ConfElem> > elems;
 
         // Put in the .cpp file to allow proper destructor call.
         ~ConfArray();
@@ -71,13 +77,60 @@ namespace zia::apipp {
             type = Empty;
         }
 
-        ConfElem(ConfElem const&) = default;
+        ConfElem(ConfElem const& r) : type(r.type), value(r.value) { std::cout << "COPY\n"; }
         ConfElem(ConfElem&&) = default;
 
         ConfElem& operator=(ConfElem const&) = default;
         ConfElem& operator=(ConfElem&&) = default;
 
         ~ConfElem();
+
+        /**
+         * Constructors
+         */
+
+        template<typename T, std::enable_if_t<NonSelf<T, ConfElem>() && !std::is_pointer_v<T> > * = nullptr  >
+        explicit ConfElem(T&& v) : type(Empty), value() {
+            std::cout << "Value copy" << std::endl;
+            if constexpr (std::is_same<std::string, T>::value)
+            {
+                std::cout << "String\n";
+                type = String;
+                value = std::forward<T>(v);
+            }
+            else if constexpr (std::is_same<ConfMap, T>::value) {
+                std::cout << "Map\n";
+                type = Map;
+                value = std::make_shared<ConfMap>(std::forward<ConfMap>(v));
+            }
+            else if constexpr (std::is_same<ConfArray, T>::value) {
+                std::cout << "Array\n";
+                type = Array;
+                value = std::make_shared<ConfArray>(std::forward<ConfArray>(v));
+            }
+            else if constexpr (std::is_same<bool, T>::value)
+            {
+                std::cout << "Bool\n";
+                type = Boolean;
+                value = v;
+            }
+            else if constexpr (std::is_integral<T>::value) {
+                std::cout << "Integer\n";
+                type = Integer;
+                value = static_cast<long long>(v);
+            }
+            else if constexpr (std::is_floating_point<T>::value) {
+                std::cout << "Double\n";
+                type = Double;
+                value = static_cast<double>(v);
+            }
+        }
+
+        template<std::size_t N>
+        explicit ConfElem(char s[N]) : type(String), value() {
+            std::cout << "Char *\n";
+            value = std::string(s);
+        }
 
         /**
          * Get the value stored in the std::variant.
@@ -139,7 +192,7 @@ namespace zia::apipp {
          */
         ConfElem &push(ConfElem &&val) & {
             try {
-                std::get<ConfArray::Sptr>(value)->elems.emplace_back( std::move(val) ) ;
+                std::get<ConfArray::Sptr>(value)->elems.emplace_back( std::make_shared<ConfElem>(std::move(val) )) ;
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -159,7 +212,7 @@ namespace zia::apipp {
 		*/
         ConfElem &&push(ConfElem &&val) && {
             try {
-                std::get<ConfArray::Sptr>(value)->elems.emplace_back( std::move(val) ) ;
+                std::get<ConfArray::Sptr>(value)->elems.emplace_back( std::make_shared<ConfElem>(std::move(val) )) ;
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -168,7 +221,39 @@ namespace zia::apipp {
         }
 
         /**
-         * Insert a value into the ConfMap value. Value is moved into the map.
+
+   * Push a ConfElem into the ConfArray value.
+   *
+   * @throw InvalidAccess if the value is not a ConfArray
+   *
+   * @tparam T
+   * @param index
+   * @param val
+   * @return
+   */
+        ConfElem &push(std::shared_ptr<ConfElem> const& val) & {
+            try {
+                std::get<ConfArray::Sptr>(value)->elems.emplace_back(val);
+            } catch (std::exception &) {
+//                std::cout << e.what() << std::endl;
+                throw InvalidAccess();
+            }
+            return *this;
+        }
+
+        ConfElem &&push(std::shared_ptr<ConfElem> const& val) && {
+            try {
+                std::get<ConfArray::Sptr>(value)->elems.emplace_back(val);
+            } catch (std::exception &) {
+//                std::cout << e.what() << std::endl;
+                throw InvalidAccess();
+            }
+            return std::move(*this);
+        }
+
+
+        /**
+         * Insert a value into the ConfMap value.
          *
          * @throw InvalidAccess if the value is not a ConfMap.
          *
@@ -178,7 +263,7 @@ namespace zia::apipp {
          */
         ConfElem &set_at(const std::string &index, ConfElem && val) & {
             try {
-                std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::move(val));
+                std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::make_shared<ConfElem>(std::move(val)));
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -197,7 +282,7 @@ namespace zia::apipp {
 		*/
         ConfElem &&set_at(const std::string &index, ConfElem && val) && {
             try {
-                std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::move(val));
+                std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::make_shared<ConfElem>(std::move(val)));
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -205,17 +290,7 @@ namespace zia::apipp {
             return std::move(*this);
         }
 
-
-		/**
-		* Insert a value into the ConfMap value. Value is copied into the map element.
-		*
-		* @throw InvalidAccess if the value is not a ConfMap.
-		*
-		* @param index
-		* @param val
-		* @return
-		*/
-        ConfElem &set_at(const std::string &index, ConfElem const& val) & {
+        ConfElem &set_at(const std::string &index, std::shared_ptr<ConfElem> const& val) & {
             try {
                 std::get<ConfMap::Sptr>(value)->elems.emplace(index, val);
             } catch (std::exception &) {
@@ -225,19 +300,9 @@ namespace zia::apipp {
             return *this;
         }
 
-		/**
-		* Insert a value into the ConfMap value. Value is copied into the map element.
-		*
-		* @throw InvalidAccess if the value is not a ConfMap.
-		*
-		* @param index
-		* @param val
-		* @return
-		*/
-        ConfElem &&set_at(const std::string &index, ConfElem const& val) && {
+        ConfElem &&set_at(const std::string &index, std::shared_ptr<ConfElem> const& val) && {
             try {
                 std::get<ConfMap::Sptr>(value)->elems.emplace(index, val);
-
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -264,7 +329,7 @@ namespace zia::apipp {
          */
         ConfElem &operator[](const int index) {
             try {
-                return (std::get<ConfArray::Sptr>(value))->elems.at(index);
+                return *(std::get<ConfArray::Sptr>(value))->elems.at(index);
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -281,8 +346,7 @@ namespace zia::apipp {
 		*/
         const ConfElem &operator[](const int index) const {
             try {
-                return (std::get<ConfArray::Sptr>(value))->elems.at(index);
-
+                return *(std::get<ConfArray::Sptr>(value))->elems.at(index);
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -299,13 +363,12 @@ namespace zia::apipp {
          */
         ConfElem &operator[](const std::string &index) {
             try {
-                return (std::get<ConfMap::Sptr>(value))->elems.at(index);
+                return *(std::get<ConfMap::Sptr>(value))->elems.at(index);
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
             }
         }
-
 
 		/**
 		* Access to an index of a ConfMap.
@@ -317,7 +380,7 @@ namespace zia::apipp {
 		*/
         const ConfElem &operator[](const std::string &index) const {
             try {
-                return (std::get<ConfMap::Sptr>(value))->elems.at(index);
+                return *(std::get<ConfMap::Sptr>(value))->elems.at(index);
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();

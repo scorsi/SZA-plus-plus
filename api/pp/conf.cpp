@@ -20,14 +20,14 @@ namespace zia::apipp {
   template<>
   ConfElem &ConfElem::set<ConfMap>(ConfMap &&val) & {
       type = Map;
-      value = std::make_unique<ConfMap>(std::move(val));
+      value = std::make_shared<ConfMap>(std::move(val));
       return *this;
   }
 
   template<>
   ConfElem &&ConfElem::set<ConfMap>(ConfMap &&val) && {
       type = Map;
-      value = std::make_unique<ConfMap>(std::move(val));
+      value = std::make_shared<ConfMap>(std::move(val));
       return std::move(*this);
   }
 
@@ -40,14 +40,14 @@ namespace zia::apipp {
   template<>
   ConfElem &ConfElem::set<ConfArray>(ConfArray &&val) & {
       type = Array;
-      value = std::make_unique<ConfArray>(std::move(val));
+      value = std::make_shared<ConfArray>(std::move(val));
       return *this;
   }
 
   template<>
   ConfElem &&ConfElem::set<ConfArray>(ConfArray &&val) && {
       type = Array;
-      value = std::make_unique<ConfArray>(std::move(val));
+      value = std::make_shared<ConfArray>(std::move(val));
       return std::move(*this);
   }
 
