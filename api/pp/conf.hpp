@@ -13,11 +13,10 @@ namespace zia::apipp {
     class ConfElem;
 
     template<typename T, typename U>
-    constexpr bool NonSelf()
-    {
+    constexpr bool isThisType() {
         using decayed = std::decay_t<T>;
-        return !std::is_same<decayed, U>::value;
-    }
+        return std::is_same_v<decayed, U>;
+    };
 
     struct ConfMap {
 
@@ -70,18 +69,77 @@ namespace zia::apipp {
 
     private:
         Type type;
-        std::variant<std::monostate, ConfMap::Sptr, ConfArray::Sptr, std::string, long long, double, bool> value;
+        using Variant = std::variant<std::monostate, ConfMap::Sptr, ConfArray::Sptr, std::string, long long, double, bool>;
+
+        Variant value;
+
+        template<typename TElem>
+        struct variant_helper
+        {
+            template<typename T = TElem, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<bool, T> >* = nullptr>
+            static Type get_type() { return Integer; }
+
+            template<typename T = TElem, std::enable_if_t<std::is_floating_point_v<T> > * = nullptr>
+            static Type get_type() { return Double; }
+
+            template<typename T = TElem, std::enable_if_t<std::is_same_v<std::string, T> > * = nullptr>
+            static Type get_type() { return String; }
+
+            template<typename T = TElem, std::enable_if_t<std::is_same_v<ConfArray, T> ||
+                                                          std::is_same_v<ConfArray::Sptr, T> > * = nullptr>
+            static Type get_type() { return Array; }
+
+            template<typename T = TElem, std::enable_if_t<std::is_same_v<ConfMap, T> ||
+                                                          std::is_same_v<ConfMap::Sptr, T> > * = nullptr>
+            static Type get_type() { return Map; }
+
+            template<typename T = TElem, std::enable_if_t<std::is_same_v<bool, T> >* = nullptr>
+            static Type get_type() { return Boolean; }
+
+            template<typename T, typename U = TElem, std::enable_if_t<std::is_integral_v<U> && !std::is_same_v<bool, U> >* = nullptr>
+            static void set_value(T &&value, Variant &var) {
+                var = static_cast<long long>(value);
+            };
+
+            template<typename T, typename U = TElem, std::enable_if_t<std::is_floating_point_v<U> > * = nullptr>
+            static void set_value(T &&value, Variant &var) {
+                var = static_cast<double>(value);
+            };
+
+            template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<std::string, U> > * = nullptr>
+            static void set_value(T &&value, Variant &var)
+            {
+                var = std::move(value);
+            };
+
+            template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<ConfArray, U>
+                                                          || std::is_same_v<ConfMap, U> > * = nullptr>
+            static void set_value(T &&value, Variant &var) {
+                var = std::make_shared<TElem>(std::forward<TElem>(value));
+            };
+
+            template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<bool, T> >* = nullptr>
+            static void set_value(T &&value, Variant &var) {
+                var = value;
+            };
+
+            template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<ConfArray::Sptr, U>
+                                                          || std::is_same_v<ConfMap::Sptr, U> >* = nullptr>
+            static void set_value(T const& value, Variant &var) {
+                var = value;
+            };
+        };
 
     public:
         ConfElem() {
             type = Empty;
         }
 
-        ConfElem(ConfElem const& r) : type(r.type), value(r.value) { std::cout << "COPY\n"; }
-        ConfElem(ConfElem&&) = default;
+        ConfElem(ConfElem const& r) = default;
+        ConfElem(ConfElem&&) noexcept = default;
 
         ConfElem& operator=(ConfElem const&) = default;
-        ConfElem& operator=(ConfElem&&) = default;
+        ConfElem& operator=(ConfElem&&) noexcept = default;
 
         ~ConfElem();
 
@@ -89,47 +147,9 @@ namespace zia::apipp {
          * Constructors
          */
 
-        template<typename T, std::enable_if_t<NonSelf<T, ConfElem>() && !std::is_pointer_v<T> > * = nullptr  >
-        explicit ConfElem(T&& v) : type(Empty), value() {
-            std::cout << "Value copy" << std::endl;
-            if constexpr (std::is_same<std::string, T>::value)
-            {
-                std::cout << "String\n";
-                type = String;
-                value = std::forward<T>(v);
-            }
-            else if constexpr (std::is_same<ConfMap, T>::value) {
-                std::cout << "Map\n";
-                type = Map;
-                value = std::make_shared<ConfMap>(std::forward<ConfMap>(v));
-            }
-            else if constexpr (std::is_same<ConfArray, T>::value) {
-                std::cout << "Array\n";
-                type = Array;
-                value = std::make_shared<ConfArray>(std::forward<ConfArray>(v));
-            }
-            else if constexpr (std::is_same<bool, T>::value)
-            {
-                std::cout << "Bool\n";
-                type = Boolean;
-                value = v;
-            }
-            else if constexpr (std::is_integral<T>::value) {
-                std::cout << "Integer\n";
-                type = Integer;
-                value = static_cast<long long>(v);
-            }
-            else if constexpr (std::is_floating_point<T>::value) {
-                std::cout << "Double\n";
-                type = Double;
-                value = static_cast<double>(v);
-            }
-        }
-
-        template<std::size_t N>
-        explicit ConfElem(char s[N]) : type(String), value() {
-            std::cout << "Char *\n";
-            value = std::string(s);
+        template<typename T, std::enable_if_t<!isThisType<T, ConfElem>()> * = nullptr>
+        explicit ConfElem(T&& v) : type(variant_helper<std::decay_t<T>>::get_type()), value() {
+            variant_helper<std::decay_t<T> >::set_value(std::forward<T>(v), value);
         }
 
         /**
@@ -174,11 +194,24 @@ namespace zia::apipp {
          *
          * @tparam T
          */
-        template<typename T>
-        ConfElem &set(T &&) &;
 
         template<typename T>
-        ConfElem &&set(T &&) &&;
+        ConfElem &set(T && v) &
+        {
+            using decayed = std::decay_t<T>;
+            type = variant_helper<decayed>::get_type();
+            variant_helper<decayed>::set_value(std::forward<T>(v), value);
+            return *this;
+        }
+
+        template<typename T>
+        ConfElem &&set(T && v) &&
+        {
+            using decayed = std::decay_t<T>;
+            type = variant_helper<decayed>::get_type();
+            variant_helper<decayed>::set_value(std::forward<T>(v), value);
+            return std::move(*this);
+        }
 
         /**
          * Push a ConfElem into the ConfArray value. The value is moved into the array.
@@ -251,7 +284,6 @@ namespace zia::apipp {
             return std::move(*this);
         }
 
-
         /**
          * Insert a value into the ConfMap value.
          *
@@ -263,7 +295,7 @@ namespace zia::apipp {
          */
         ConfElem &set_at(const std::string &index, ConfElem && val) & {
             try {
-                std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::make_shared<ConfElem>(std::move(val)));
+                std::get<ConfMap::Sptr>(value)->elems[index] = std::make_shared<ConfElem>(std::move(val));
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -282,7 +314,7 @@ namespace zia::apipp {
 		*/
         ConfElem &&set_at(const std::string &index, ConfElem && val) && {
             try {
-                std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::make_shared<ConfElem>(std::move(val)));
+                std::get<ConfMap::Sptr>(value)->elems[index] = std::make_shared<ConfElem>(std::move(val));
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -292,7 +324,7 @@ namespace zia::apipp {
 
         ConfElem &set_at(const std::string &index, std::shared_ptr<ConfElem> const& val) & {
             try {
-                std::get<ConfMap::Sptr>(value)->elems.emplace(index, val);
+                std::get<ConfMap::Sptr>(value)->elems[index] = val;
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -302,7 +334,7 @@ namespace zia::apipp {
 
         ConfElem &&set_at(const std::string &index, std::shared_ptr<ConfElem> const& val) && {
             try {
-                std::get<ConfMap::Sptr>(value)->elems.emplace(index, val);
+                std::get<ConfMap::Sptr>(value)->elems[index] = val;
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();

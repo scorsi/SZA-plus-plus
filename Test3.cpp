@@ -7,8 +7,6 @@
 using namespace std::literals::string_literals;
 
 using namespace zia::apipp;
-/// TODO:  Helpers to set values in ConfElem constructor.
-/// TODO:  Add set version with copyable value arguments.
 void test3() {
     auto conf = ConfElem()
         .set(ConfMap())
@@ -34,17 +32,18 @@ void test3() {
     std::cout << conf.get_at("array_test").get_at(0).get<bool>() << std::endl;
     std::cout << conf.get_at("array_test").get_at(1).get<bool>() << std::endl;
 
-    /// Really ugly syntax...
-    /// std::cout << (*conf)["array_test"]->operator[](0)->get<bool>() << std::endl;
     std::cout << conf["array_test"][0].get<bool>() << std::endl;
 
     /// Test with copy
     {
+        std::cout << "TEST -- No copy" << std::endl;
         auto conf3 = std::make_shared<ConfElem>();
         conf3->set(ConfArray());
 
         auto conf4 = std::make_shared<ConfElem>();
-        conf4->set("toto"s);
+
+        std::string v("toto");
+        conf4->set(v);
 
         conf3->push(conf4);
         conf3->push(ConfElem().set("titi"s));
@@ -52,9 +51,9 @@ void test3() {
         /// Copy a previous config object but doesn't keep references.
         auto conf2 = conf;
         conf2.set(ConfMap()).set_at("data", conf3);
-        conf2.set_at("string_test", ConfElem().set("In Copied Map."s));
+        conf2.set_at("string_test", ConfElem().set("in_copied_map."s));
 
-        conf4->set("Oui"s);
+        conf4->set("new_value"s);
 
         std::cout << conf.get_at("string_test").get<std::string>() << std::endl;
         std::cout << conf2.get_at("string_test").get<std::string>() << std::endl;
@@ -64,26 +63,40 @@ void test3() {
 
     /// Test with constructor helpers
     {
-        auto conf3 = std::make_shared<ConfElem>(ConfArray());
-        ///conf3->set(ConfArray());
+        std::cout << "TEST --  Contructor helpers." << std::endl;
 
-        auto conf4 = std::make_shared<ConfElem>("toto");
-        ///conf4->set("toto"s);
-        auto confNope = std::make_shared<ConfElem>(std::vector<int>());
+        /// Works also without shared_ptr, but must be either moved or  built inline.
+        auto confArray = std::make_shared<ConfElem>(ConfArray());
+        std::cout << "ConfArray Type: " << confArray->getType() << std::endl;
+        auto confString = std::make_shared<ConfElem>("toto"s);
+        std::cout << "ConfString Type: " << confString->getType() << std::endl;
         auto confMap = std::make_shared<ConfElem>(ConfMap());
+        std::cout << "ConfMap Type: " << confMap->getType() << std::endl;
         auto confInt = std::make_shared<ConfElem>(426879);
+        std::cout << "ConfInt Type: " << confInt->getType() << std::endl;
         auto confLong = std::make_shared<ConfElem>(8566756747856);
+        std::cout << "ConfLong Type: " << confLong->getType() << std::endl;
         auto confBool = std::make_shared<ConfElem>(true);
+        std::cout << "ConfBool Type: " << confBool->getType() << std::endl;
         auto confFloat = std::make_shared<ConfElem>(42.42);
+        std::cout << "ConfFloat Type: " << confFloat->getType() << std::endl;
         auto confDouble = std::make_shared<ConfElem>(42.42856756567);
-        conf3->push(conf4);
-        conf3->push(ConfElem("titi"s));
+        std::cout << "ConfDouble Type: " << confDouble->getType() << std::endl;
 
-        auto conf2 = conf.set(ConfMap()).set_at("data", conf3);
-        conf4->set("Oui"s);
+        confArray->push(confString);
+        confArray->push(ConfElem("titi"s));
+
+        auto conf2 = conf.set(ConfMap()).set_at("data", confArray);
+        confString->set("new_value"s);
 
         std::cout << conf2.get_at("data").get_at(0).get<std::string>() << std::endl;
         std::cout << conf2.get_at("data").get_at(1).get<std::string>() << std::endl;
+
+        confMap->set_at("first", ConfElem("Value1"s));
+        confMap->set_at("second", ConfElem("Value2"s));
+
+        conf2.set_at("data", confMap);
+        std::cout << conf2.get_at("data").get_at("first").get<std::string>() << std::endl;
     }
 
 //    auto conftest = ConfElem(42);
