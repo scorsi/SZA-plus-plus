@@ -18,10 +18,10 @@ namespace zia::apipp {
         using Sptr = std::shared_ptr<ConfMap>;
 
         ConfMap() = default;
-//        ConfMap(ConfMap const&) = default;
+        ConfMap(ConfMap const&) = default;
         ConfMap(ConfMap&&) = default;
 
-  //      ConfMap& operator=(ConfMap const&) = default;
+        ConfMap& operator=(ConfMap const&) = default;
         ConfMap& operator=(ConfMap&&) = default;
 
         std::map<std::string, ConfElem> elems;
@@ -35,10 +35,10 @@ namespace zia::apipp {
         using Sptr = std::shared_ptr<ConfArray>;
 
         ConfArray() = default;
-    //    ConfArray(ConfArray const&) = default;
+        ConfArray(ConfArray const&) = default;
         ConfArray(ConfArray&&) = default;
 
-      //  ConfArray& operator=(ConfArray const&) = default;
+        ConfArray& operator=(ConfArray const&) = default;
         ConfArray& operator=(ConfArray&&) = default;
 
         std::vector<ConfElem> elems;
@@ -115,7 +115,7 @@ namespace zia::apipp {
 
         /**
          * Set the value into the std::variant.
-         *
+         *  
          * If a invalid T is passed, a error (LNK2019 on MSVC) will occur during the linking pass of the compilation.
          *
          * @tparam T
@@ -127,8 +127,8 @@ namespace zia::apipp {
         ConfElem &&set(T &&) &&;
 
         /**
-         * Push a ConfElem into the ConfArray value.
-         *
+         * Push a ConfElem into the ConfArray value. The value is moved into the array.
+         * 
          * @throw InvalidAccess if the value is not a ConfArray
          *
          * @tparam T
@@ -146,6 +146,16 @@ namespace zia::apipp {
             return *this;
         }
 
+		/**
+		* Push a ConfElem into the ConfArray value. The value is moved into the array.
+		*
+		* @throw InvalidAccess if the value is not a ConfArray
+		*
+		* @tparam T
+		* @param index
+		* @param val
+		* @return
+		*/
         ConfElem &&push(ConfElem &&val) && {
             try {
                 std::get<ConfArray::Sptr>(value)->elems.emplace_back( std::move(val) ) ;
@@ -157,13 +167,13 @@ namespace zia::apipp {
         }
 
         /**
-         * Insert a value into the ConfMap value.
+         * Insert a value into the ConfMap value. Value is moved into the map.
          *
          * @throw InvalidAccess if the value is not a ConfMap.
          *
          * @param index
          * @param val
-         * @return
+         * @return.
          */
         ConfElem &set_at(const std::string &index, ConfElem && val) & {
             try {
@@ -175,6 +185,15 @@ namespace zia::apipp {
             return *this;
         }
 
+		/**
+		* Insert a value into the ConfMap value. Value is moved into the map.
+		*
+		* @throw InvalidAccess if the value is not a ConfMap.
+		*
+		* @param index
+		* @param val
+		* @return
+		*/
         ConfElem &&set_at(const std::string &index, ConfElem && val) && {
             try {
                 std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::move(val));
@@ -185,6 +204,15 @@ namespace zia::apipp {
             return std::move(*this);
         }
 
+		/**
+		* Insert a value into the ConfMap value. Value is copied into the map element.
+		*
+		* @throw InvalidAccess if the value is not a ConfMap.
+		*
+		* @param index
+		* @param val
+		* @return
+		*/
         ConfElem &set_at(const std::string &index, ConfElem const& val) & {
             try {
                 std::get<ConfMap::Sptr>(value)->elems.emplace(index, val);
@@ -195,6 +223,15 @@ namespace zia::apipp {
             return *this;
         }
 
+		/**
+		* Insert a value into the ConfMap value. Value is copied into the map element.
+		*
+		* @throw InvalidAccess if the value is not a ConfMap.
+		*
+		* @param index
+		* @param val
+		* @return
+		*/
         ConfElem &&set_at(const std::string &index, ConfElem const& val) && {
             try {
                 std::get<ConfMap::Sptr>(value)->elems.emplace(index, val);
@@ -232,6 +269,14 @@ namespace zia::apipp {
             }
         }
 
+		/**
+		* Access to an index of a constant ConfArray.
+		*
+		* @throw InvalidAccess if the value is not a ConfArray
+		*
+		* @param index
+		* @return
+		*/
         const ConfElem &operator[](const int index) const {
             try {
                 return (std::get<ConfArray::Sptr>(value))->elems.at(index);
@@ -258,6 +303,14 @@ namespace zia::apipp {
             }
         }
 
+		/**
+		* Access to an index of a ConfMap.
+		*
+		* @throw InvalidAccess if the value is not a ConfMap
+		*
+		* @param index
+		* @return
+		*/
         const ConfElem &operator[](const std::string &index) const {
             try {
                 return (std::get<ConfMap::Sptr>(value))->elems.at(index);

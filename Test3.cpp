@@ -8,6 +8,7 @@ using namespace std::literals::string_literals;
 
 using namespace zia::apipp;
 /// TODO:  Helpers to set values in ConfElem constructor.
+/// TODO:  Add set version with copyable value arguments.
 void test3() {
     auto conf = ConfElem()
         .set(ConfMap())
