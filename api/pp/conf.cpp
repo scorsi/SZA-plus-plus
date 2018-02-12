@@ -6,25 +6,11 @@
 
 namespace zia::apipp {
 
-    apipp::ConfMap::~ConfMap() {
-        for (auto &item : elems) {
-            delete item.second;
-        }
-    }
+    apipp::ConfMap::~ConfMap() = default;
 
-    ConfArray::~ConfArray() {
-        for (auto &item : elems) {
-            delete item;
-        }
-    }
+    ConfArray::~ConfArray() = default;
 
-    ConfElem::~ConfElem() {
-        if (type == Map) {
-            delete std::get<ConfMap *>(value);
-        } else if (type == Array) {
-            delete std::get<ConfArray *>(value);
-        }
-    }
+    ConfElem::~ConfElem() = default;
 
   /**
   * Set a ConfMap value.
@@ -32,22 +18,37 @@ namespace zia::apipp {
   * @param val
   */
   template<>
-  ConfElem *ConfElem::set<ConfMap *>(ConfMap *&&val) {
+  ConfElem &ConfElem::set<ConfMap>(ConfMap &&val) & {
       type = Map;
-      value = std::forward<ConfMap *>(val);
-      return this;
+      value = std::make_unique<ConfMap>(std::move(val));
+      return *this;
+  }
+
+  template<>
+  ConfElem &&ConfElem::set<ConfMap>(ConfMap &&val) && {
+      type = Map;
+      value = std::make_unique<ConfMap>(std::move(val));
+      return std::move(*this);
   }
 
   /**
-   * Set a ConfArray value.
-   *
-   * @param val
-   */
+  * Set a ConfArray value.
+  *
+  * @param val
+  */
+
   template<>
-  ConfElem *ConfElem::set<ConfArray *>(ConfArray *&&val) {
+  ConfElem &ConfElem::set<ConfArray>(ConfArray &&val) & {
       type = Array;
-      value = std::forward<ConfArray *>(val);
-      return this;
+      value = std::make_unique<ConfArray>(std::move(val));
+      return *this;
+  }
+
+  template<>
+  ConfElem &&ConfElem::set<ConfArray>(ConfArray &&val) && {
+      type = Array;
+      value = std::make_unique<ConfArray>(std::move(val));
+      return std::move(*this);
   }
 
   /**
@@ -58,11 +59,19 @@ namespace zia::apipp {
    * @bug when using like : conf.set("toto"). Possible fix: using the string_literal suffixe to use std::string instead of char *.
    * @param val
    */
+
   template<>
-  ConfElem *ConfElem::set<char *>(char *&&val) {
+  ConfElem &ConfElem::set<char *>(char *&&val) & {
       type = String;
-      value = std::string(std::forward<char *>(val));
-      return this;
+      value = std::string(val);
+      return *this;
+  }
+
+  template<>
+  ConfElem &&ConfElem::set<char *>(char *&&val) && {
+      type = String;
+      value = std::string(val);
+      return std::move(*this);
   }
 
   /**
@@ -71,10 +80,17 @@ namespace zia::apipp {
    * @param val
    */
   template<>
-  ConfElem *ConfElem::set<std::string>(std::string &&val) {
+  ConfElem &ConfElem::set<std::string>(std::string &&val) & {
       type = String;
-      value = std::forward<std::string>(val);
-      return this;
+      value = std::move(val);
+      return *this;
+  }
+
+  template<>
+  ConfElem &&ConfElem::set<std::string>(std::string &&val) && {
+      type = String;
+      value = std::move(val);
+      return std::move(*this);
   }
 
   /**
@@ -84,10 +100,17 @@ namespace zia::apipp {
    * @param val
    */
   template<>
-  ConfElem *ConfElem::set<int>(int &&val) {
+  ConfElem &ConfElem::set<int>(int &&val) & {
       type = Integer;
-      value = static_cast<long long>(std::forward<int>(val));
-      return this;
+      value = static_cast<long long>(val);
+      return *this;
+  }
+
+  template<>
+  ConfElem &&ConfElem::set<int>(int &&val) && {
+      type = Integer;
+      value = static_cast<long long>(val);
+      return std::move(*this);
   }
 
   /**
@@ -96,23 +119,38 @@ namespace zia::apipp {
    * @param val
    */
   template<>
-  ConfElem *ConfElem::set<long long>(long long &&val) {
+  ConfElem &ConfElem::set<long long>(long long &&val) & {
       type = Integer;
-      value = std::forward<long long>(val);
-      return this;
+      value = val;
+      return *this;
   }
 
-  /**
+    template<>
+    ConfElem &&ConfElem::set<long long>(long long &&val) && {
+        type = Integer;
+        value = val;
+        return std::move(*this);
+    }
+
+
+    /**
    * Set a double value.
    * Alias for double.
    *
    * @param val
    */
+    template<>
+    ConfElem &ConfElem::set<float>(float &&val) & {
+        type = Integer;
+        value = static_cast<double>(val);
+        return *this;
+    }
+
   template<>
-  ConfElem *ConfElem::set<float>(float &&val) {
+  ConfElem &&ConfElem::set<float>(float &&val) && {
       type = Integer;
-      value = static_cast<double>(std::forward<float>(val));
-      return this;
+      value = static_cast<double>(val);
+      return std::move(*this);
   }
 
   /**
@@ -121,10 +159,17 @@ namespace zia::apipp {
    * @param val
    */
   template<>
-  ConfElem *ConfElem::set<double>(double &&val) {
+  ConfElem &ConfElem::set<double>(double &&val) & {
       type = Double;
-      value = std::forward<double>(val);
-      return this;
+      value = val;
+      return *this;
+  }
+
+  template<>
+  ConfElem &&ConfElem::set<double>(double &&val) && {
+      type = Double;
+      value = val;
+      return std::move(*this);
   }
 
   /**
@@ -133,9 +178,16 @@ namespace zia::apipp {
    * @param val
    */
   template<>
-  ConfElem *ConfElem::set<bool>(bool &&val) {
+  ConfElem &ConfElem::set<bool>(bool &&val) & {
       type = Boolean;
-      value = std::forward<bool>(val);
-      return this;
+      value = val;
+      return *this;
+  }
+
+  template<>
+  ConfElem &&ConfElem::set<bool>(bool &&val) && {
+      type = Boolean;
+      value = val;
+      return std::move(*this);
   }
 }

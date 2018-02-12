@@ -2,6 +2,7 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include "../conf.h"
 
 /**
@@ -12,14 +13,35 @@ namespace zia::apipp {
     class ConfElem;
 
     struct ConfMap {
-        std::map<std::string, ConfElem *> elems;
+
+        using Uptr = std::unique_ptr<ConfMap>;
+        using Sptr = std::shared_ptr<ConfMap>;
+
+        ConfMap() = default;
+//        ConfMap(ConfMap const&) = default;
+        ConfMap(ConfMap&&) = default;
+
+  //      ConfMap& operator=(ConfMap const&) = default;
+        ConfMap& operator=(ConfMap&&) = default;
+
+        std::map<std::string, ConfElem> elems;
 
         // Put in the .cpp file to allow proper destructor call.
         ~ConfMap();
     };
 
     struct ConfArray {
-        std::vector<ConfElem *> elems;
+        using Uptr = std::unique_ptr<ConfArray>;
+        using Sptr = std::shared_ptr<ConfArray>;
+
+        ConfArray() = default;
+    //    ConfArray(ConfArray const&) = default;
+        ConfArray(ConfArray&&) = default;
+
+      //  ConfArray& operator=(ConfArray const&) = default;
+        ConfArray& operator=(ConfArray&&) = default;
+
+        std::vector<ConfElem> elems;
 
         // Put in the .cpp file to allow proper destructor call.
         ~ConfArray();
@@ -42,12 +64,18 @@ namespace zia::apipp {
 
     private:
         Type type;
-        std::variant<std::monostate, ConfMap *, ConfArray *, std::string, long long, double, bool> value;
+        std::variant<std::monostate, ConfMap::Sptr, ConfArray::Sptr, std::string, long long, double, bool> value;
 
     public:
         ConfElem() {
             type = Empty;
         }
+
+        ConfElem(ConfElem const&) = default;
+        ConfElem(ConfElem&&) = default;
+
+        ConfElem& operator=(ConfElem const&) = default;
+        ConfElem& operator=(ConfElem&&) = default;
 
         ~ConfElem();
 
@@ -61,7 +89,7 @@ namespace zia::apipp {
          * @return
          */
         template<typename T>
-        T get() {
+        T get() const {
             try {
                 return std::get<T>(value);
             } catch (std::bad_variant_access &) {
@@ -69,11 +97,19 @@ namespace zia::apipp {
             }
         }
 
-        ConfElem *get_at(const int index) {
+        ConfElem &get_at(const int index) {
             return (*this)[index];
         }
 
-        ConfElem *get_at(const std::string &index) {
+        const ConfElem &get_at(const int index) const {
+            return (*this)[index];
+        }
+
+        ConfElem &get_at(const std::string &index) {
+            return (*this)[index];
+        }
+
+        const ConfElem &get_at(const std::string &index) const {
             return (*this)[index];
         }
 
@@ -85,7 +121,10 @@ namespace zia::apipp {
          * @tparam T
          */
         template<typename T>
-        ConfElem *set(T &&);
+        ConfElem &set(T &&) &;
+
+        template<typename T>
+        ConfElem &&set(T &&) &&;
 
         /**
          * Push a ConfElem into the ConfArray value.
@@ -97,14 +136,24 @@ namespace zia::apipp {
          * @param val
          * @return
          */
-        ConfElem *push(ConfElem *val) {
+        ConfElem &push(ConfElem &&val) & {
             try {
-                std::get<ConfArray *>(value)->elems.push_back(val);
+                std::get<ConfArray::Sptr>(value)->elems.emplace_back( std::move(val) ) ;
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
             }
-            return this;
+            return *this;
+        }
+
+        ConfElem &&push(ConfElem &&val) && {
+            try {
+                std::get<ConfArray::Sptr>(value)->elems.emplace_back( std::move(val) ) ;
+            } catch (std::exception &) {
+//                std::cout << e.what() << std::endl;
+                throw InvalidAccess();
+            }
+            return std::move(*this);
         }
 
         /**
@@ -116,15 +165,46 @@ namespace zia::apipp {
          * @param val
          * @return
          */
-        ConfElem *set_at(const std::string &index, ConfElem *val) {
+        ConfElem &set_at(const std::string &index, ConfElem && val) & {
             try {
-                std::get<ConfMap *>(value)->elems[index] = val;
+                std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::move(val));
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
             }
-            return this;
+            return *this;
         }
+
+        ConfElem &&set_at(const std::string &index, ConfElem && val) && {
+            try {
+                std::get<ConfMap::Sptr>(value)->elems.emplace(index, std::move(val));
+            } catch (std::exception &) {
+//                std::cout << e.what() << std::endl;
+                throw InvalidAccess();
+            }
+            return std::move(*this);
+        }
+
+        ConfElem &set_at(const std::string &index, ConfElem const& val) & {
+            try {
+                std::get<ConfMap::Sptr>(value)->elems.emplace(index, val);
+            } catch (std::exception &) {
+//                std::cout << e.what() << std::endl;
+                throw InvalidAccess();
+            }
+            return *this;
+        }
+
+        ConfElem &&set_at(const std::string &index, ConfElem const& val) && {
+            try {
+                std::get<ConfMap::Sptr>(value)->elems.emplace(index, val);
+            } catch (std::exception &) {
+//                std::cout << e.what() << std::endl;
+                throw InvalidAccess();
+            }
+            return std::move(*this);
+        }
+
 
         /**
          * Get the enum type of the variant value.
@@ -143,9 +223,18 @@ namespace zia::apipp {
          * @param index
          * @return
          */
-        ConfElem *operator[](const int index) {
+        ConfElem &operator[](const int index) {
             try {
-                return (std::get<ConfArray *>(value))->elems.at(index);
+                return (std::get<ConfArray::Sptr>(value))->elems.at(index);
+            } catch (std::exception &) {
+//                std::cout << e.what() << std::endl;
+                throw InvalidAccess();
+            }
+        }
+
+        const ConfElem &operator[](const int index) const {
+            try {
+                return (std::get<ConfArray::Sptr>(value))->elems.at(index);
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
@@ -160,14 +249,24 @@ namespace zia::apipp {
          * @param index
          * @return
          */
-        ConfElem *operator[](const std::string &index) {
+        ConfElem &operator[](const std::string &index) {
             try {
-                return (std::get<ConfMap *>(value))->elems.at(index);
+                return (std::get<ConfMap::Sptr>(value))->elems.at(index);
             } catch (std::exception &) {
 //                std::cout << e.what() << std::endl;
                 throw InvalidAccess();
             }
         }
+
+        const ConfElem &operator[](const std::string &index) const {
+            try {
+                return (std::get<ConfMap::Sptr>(value))->elems.at(index);
+            } catch (std::exception &) {
+//                std::cout << e.what() << std::endl;
+                throw InvalidAccess();
+            }
+        }
+
 
         static ConfElem fromBasicConfig(const zia::api::Conf &conf) {
             return {};
@@ -180,7 +279,7 @@ namespace zia::apipp {
      * @return
      */
     template<>
-    inline int ConfElem::get<int>() {
+    inline int ConfElem::get<int>() const {
         return static_cast<int>(get<long long>());
     }
 
@@ -190,7 +289,7 @@ namespace zia::apipp {
      * @return
      */
     template<>
-    inline float ConfElem::get<float>() {
+    inline float ConfElem::get<float>() const {
         return static_cast<float>(get<double>());
     }
 
