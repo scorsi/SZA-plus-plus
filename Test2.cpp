@@ -79,8 +79,7 @@ void test2() {
     modules.push_back(new Test2());
     modules.push_back(new Test3());
 
-    zia::apipp::NetPtr net = std::make_shared<zia::apipp::Net>();
-
+    auto net = zia::api::NetInfo();
     // We create a false request
     zia::apipp::RequestPtr request = std::make_shared<zia::apipp::Request>(zia::api::http::Version::http_1_1,
                                                                            zia::api::http::Method::get,

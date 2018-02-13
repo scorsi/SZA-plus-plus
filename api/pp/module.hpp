@@ -14,7 +14,7 @@ namespace zia::apipp {
         Conf conf{};
         ResponsePtr response{};
         RequestPtr request{};
-        NetPtr net{};
+        zia::api::NetInfo net{};
 
     public:
         ~Module() override = default;
@@ -28,10 +28,9 @@ namespace zia::apipp {
             // We must be sure that we correctly releasing pointers
             this->request.reset();
             this->response.reset();
-            this->net.reset();
         }
 
-        bool smartExec(RequestPtr &request, ResponsePtr &response, NetPtr &net) {
+        bool smartExec(RequestPtr &request, ResponsePtr &response, zia::api::NetInfo &net) {
             this->request = request;
             this->response = response;
             this->net = net;
@@ -45,13 +44,11 @@ namespace zia::apipp {
         bool exec(zia::api::HttpDuplex &http) override {
             this->response = Response::fromBasicHttpDuplex(http);
             this->request = Request::fromBasicHttpDuplex(http);
-            this->net = Net::fromBasicNetInfo(http.info);
 
             auto ret = this->perform();
 
             http.resp = this->response->toBasicHttpResponse();
             http.req = this->request->toBasicHttpRequest();
-            http.info = this->net->toBasicNetInfo();
 
             this->reset(); // Reset pointers.
             return ret;

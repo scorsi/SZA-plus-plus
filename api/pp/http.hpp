@@ -193,8 +193,8 @@ namespace zia::apipp {
     using RequestPtr = std::shared_ptr<Request>;
 
     static zia::api::HttpDuplex
-    createBasicHttpDuplex(const RequestPtr &request, const ResponsePtr &response, const NetPtr &net) {
-        return zia::api::HttpDuplex{{}, request->inputRawData, response->outputRawData,
+    createBasicHttpDuplex(const RequestPtr &request, const ResponsePtr &response, const zia::api::NetInfo &net) {
+        return zia::api::HttpDuplex{net, request->inputRawData, response->outputRawData,
                                     request->toBasicHttpRequest(), response->toBasicHttpResponse()};
     }
 
