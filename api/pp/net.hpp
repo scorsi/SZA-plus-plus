@@ -5,11 +5,10 @@
 
 #include "../net.h"
 
-namespace zia::apipp {
-
-    class NetSocket : zia::api::ImplSocket {
+namespace zia::api {
+    struct ImplSocket {
         void sendMessage();
+
         std::string receiveMessage();
     };
-
 }
