@@ -7,8 +7,8 @@
 
 namespace zia::api {
     struct ImplSocket {
-        void sendMessage();
+        virtual void sendMessage(std::string &) = 0;
 
-        std::string receiveMessage();
+        virtual std::string receiveMessage() = 0;
     };
 }
