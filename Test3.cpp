@@ -3,6 +3,7 @@
 //
 
 #include "api/pp/conf.hpp"
+#include "api/pp/visitor.hpp"
 
 using namespace std::literals::string_literals;
 
@@ -99,5 +100,41 @@ void test3() {
         std::cout << conf2.get_at("data").get_at("first").get<std::string>() << std::endl;
     }
 
-//    auto conftest = ConfElem(42);
+    /// Test prettify
+    {
+        zia::api::ConfValue valueBool;
+        valueBool.v = true;
+        zia::api::ConfValue valueString;
+        valueString.v = "String Value";
+        zia::api::ConfValue valueLong;
+        valueLong.v = static_cast<long long int>(1785);
+        zia::api::ConfValue valueDouble;
+        valueDouble.v = 42.42;
+
+
+        zia::api::ConfValue valueArray;
+        valueArray.v = std::vector<zia::api::ConfValue> { valueBool, valueString, valueLong, valueDouble };
+
+        zia::api::ConfValue valueMap;
+        valueMap.v = std::map<std::string, zia::api::ConfValue> {
+            {"first", valueArray},
+            {"second", valueBool},
+            {"third", valueLong},
+            {"fourth", valueString},
+            {"fifth", valueDouble}
+        };
+        zia::api::ConfValue root = valueMap;
+
+        zia::api::Conf confRoot { { "data", root } };
+
+        auto basicprettyfied = ConfElem::basicPrettify(root);
+        std::cout << basicprettyfied << std::endl;
+    /// Tests conversion fromBasicConfig
+        auto wrappedConfig = Conf::fromBasicConfig(confRoot);
+
+        auto prettyfied = ConfElem::prettify(wrappedConfig);
+
+        std::cout << prettyfied << std::endl;
+
+    }
 }

@@ -419,10 +419,16 @@ namespace zia::apipp {
             }
         }
 
-
-        static ConfElem fromBasicConfig(const zia::api::Conf &conf) {
-            return {};
+        const Variant &getValue() const {
+            return value;
         }
+
+
+        static ConfElem fromBasicConfig(const zia::api::Conf &conf);
+
+        static std::string basicPrettify(const zia::api::ConfValue &conf);
+
+        static std::string prettify(const ConfElem &conf);
     };
 
     /**

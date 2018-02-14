@@ -11,7 +11,7 @@ add_executable(sza_plus_plus
 
         Test1.cpp
         Test2.cpp
-        Test3.cpp)
+        Test3.cpp api/pp/visitor.hpp)
 
 if (WIN32)
     target_compile_options(sza_plus_plus PRIVATE /std:c++latest)
