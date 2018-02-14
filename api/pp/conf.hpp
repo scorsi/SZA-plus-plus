@@ -118,7 +118,7 @@ namespace zia::apipp {
                 var = std::make_shared<TElem>(std::forward<TElem>(value));
             };
 
-            template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<bool, T> >* = nullptr>
+            template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<bool, U> >* = nullptr>
             static void set_value(T &&value, Variant &var) {
                 var = value;
             };
