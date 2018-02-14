@@ -99,8 +99,64 @@ namespace zia::apipp {
         }
     }
 
-    std::string ConfElem::basicPrettify(const zia::api::Conf &conf) {
-        std::ostringstream os {};
+    std::ostream &operator<<(std::ostream &os, zia::apipp::Conf const &conf) {
+        int sp {0};
+
+        constexpr auto indent = [](int indent) -> std::string {
+            return std::string(static_cast<std::size_t>(indent), ' ');
+        };
+
+        auto pvisit = make_recursive_visitor<void>( [&os, &sp, &indent](auto recurse, auto&& value) {
+            using T = std::decay_t<decltype(value)>;
+            if constexpr (std::is_same_v<T, std::monostate>) {}
+            else if constexpr (std::is_same_v<T, long long>) {
+                os << value;
+            }
+            else if constexpr (std::is_same_v<T, double>) {
+                os << std::fixed << value;
+            }
+            else if constexpr (std::is_same_v<T, bool>) {
+                os << std::boolalpha << value;
+            }
+            else if constexpr (std::is_same_v<T, std::string>) {
+                os << std::quoted(value);
+            }
+            else if constexpr (std::is_same_v<T, ConfMap::Sptr>) {
+                os << "{";
+                sp += 4;
+                for (auto endSep = --value->elems.end(), it = value->elems.begin(); it != value->elems.end() ; ++it) {
+                    if (it == value->elems.begin())
+                        os << '\n';
+                    os << indent(sp) << std::quoted(it->first) <<  ": ";
+                    recurse(it->second->getValue());
+                    if (it != endSep)
+                        os << ",\n";
+                }
+                sp -= 4;
+                os << '\n' << indent(sp) << "}";
+            }
+            else if constexpr (std::is_same_v<T, ConfArray::Sptr>) {
+                os << '[';
+                sp += 4;
+                auto it = value->elems.begin();
+
+                for (auto end = value->elems.end(); it != end; ++it) {
+                    if (it == value->elems.begin())
+                        os << '\n';
+                    os << indent(sp);
+                    recurse((*it)->getValue());
+                    if (it != end - 1)
+                        os << ",\n";
+                }
+                sp -= 4;
+                os << "\n" << indent(sp) << "]";
+            }
+        });
+        std::visit(pvisit, conf.getValue());
+        return os;
+    }
+
+    std::ostream &operator<<(std::ostream &os, zia::api::Conf &conf) {
         int sp {0};
 
         constexpr auto indent = [](int indent) -> std::string {
@@ -108,39 +164,41 @@ namespace zia::apipp {
         };
 
         auto mapPrettify = [&os, &sp, &indent] (auto recurse, zia::api::ConfObject value) {
-            os << "{\n";
+            os << "{";
             sp += 4;
-            for (auto&& v : value) {
-                os << indent(sp) << std::quoted(v.first) <<  ": ";
-                recurse(v.second.v);
-                os << ",\n";
+            for (auto endSep = --value.end(), it = value.begin(); it != value.end() ; ++it) {
+                if (it == value.begin())
+                    os << '\n';
+                os << indent(sp) << std::quoted(it->first) <<  ": ";
+                recurse(it->second.v);
+                if (it != endSep)
+                    os << ",\n";
             }
             sp -= 4;
-            os << indent(sp) << "}";
+            os << '\n' << indent(sp) << "}";
         };
-
 
         auto pvisit = make_recursive_visitor<void>(
             [&os] (auto, std::monostate) { },
             [&os] (auto, long long value) { os << value; },
             [&os] (auto, double value) { os << std::fixed << value; },
             [&os] (auto, bool value) { os << std::boolalpha << value; },
-            [&os] (auto, const std::string & value) { os << value; },
+            [&os] (auto, const std::string & value) { os << std::quoted(value); },
             [&os, &sp, &indent](auto recurse, zia::api::ConfArray value) {
-                os << "[\n";
+                os << '[';
                 sp += 4;
                 auto it = value.begin();
-                if (it != value.end())
-                {
+
+                for (auto end = value.end(); it != end; ++it) {
+                    if (it == value.begin())
+                        os << '\n';
                     os << indent(sp);
                     recurse(it->v);
-                }
-                for (auto end = value.end(); it != end; ++it) {
-                    os << ",\n" << indent(sp);
-                    recurse(it->v);
+                    if (it != end - 1)
+                        os << ",\n";
                 }
                 sp -= 4;
-                os << "\n" << indent(sp) << "]";
+                os << '\n' << indent(sp) << ']';
             },
             mapPrettify
         );
@@ -149,53 +207,6 @@ namespace zia::apipp {
         begin.v = conf;
 
         std::visit(pvisit, begin.v);
-        return os.str();
-
-    }
-
-    std::string ConfElem::prettify(const ConfElem &conf) {
-        std::ostringstream os {};
-        int sp {0};
-
-        constexpr auto indent = [](int indent) -> std::string {
-            return std::string(static_cast<std::size_t>(indent), ' ');
-        };
-
-        auto pvisit = make_recursive_visitor<void>(
-            [&os] (auto, std::monostate) { },
-            [&os] (auto, long long value) { os << value; },
-            [&os] (auto, double value) { os << std::fixed << value; },
-            [&os] (auto, bool value) { os << std::boolalpha << value; },
-            [&os] (auto, const std::string & value) { os << value; },
-            [&os, &sp, &indent] (auto recurse, const ConfMap::Sptr& map ) {
-                os << "{\n";
-                sp += 4;
-                for (auto&& v : map->elems) {
-                    os << indent(sp) << std::quoted(v.first) <<  ": ";
-                    recurse(v.second->getValue());
-                    os << ",\n";
-                }
-                sp -= 4;
-                os << indent(sp) << "}";
-            },
-            [&os, &sp, &indent] (auto recurse, const ConfArray::Sptr& array) {
-                os << "[\n";
-                sp += 4;
-                auto it = array->elems.begin();
-                if (it != array->elems.end())
-                {
-                    os << indent(sp);
-                    recurse((*it)->getValue());
-                }
-                for (auto end = array->elems.end(); it != end; ++it) {
-                    os << ",\n" << indent(sp);
-                    recurse((*it)->getValue());
-                }
-                sp -= 4;
-                os << "\n" << indent(sp) << "]";
-            }
-        );
-        std::visit(pvisit, conf.getValue());
-        return os.str();
+        return os;
     }
 }

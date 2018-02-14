@@ -17,12 +17,12 @@
 template<typename F>
 struct fix {
 public:
-    fix(F function) : _function(function) {}
+    constexpr fix(F function) : _function(function) {}
     fix(fix const&) = default;
     fix(fix&&) = default;
 
     template<typename ...Args>
-    decltype(auto) operator()(Args&& ...args) {
+    constexpr decltype(auto) operator()(Args&& ...args) {
         return _function(*this, std::forward<Args>(args)...);
     }
 private:
@@ -33,7 +33,7 @@ template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 template<typename TVisitor, typename TVariant>
-auto recursive_visit(TVisitor&& visitor, TVariant&& variant) {
+constexpr auto recursive_visit(TVisitor&& visitor, TVariant&& variant) {
     return std::visit(
         std::forward<TVisitor>(visitor),
         std::forward<TVariant>(variant)
@@ -42,7 +42,7 @@ auto recursive_visit(TVisitor&& visitor, TVariant&& variant) {
 };
 
 template<typename TReturn, typename ...TVisitors>
-auto make_recursive_visitor(TVisitors&& ...visitors)
+constexpr auto make_recursive_visitor(TVisitors&& ...visitors)
 {
     return fix([&visitors...](auto self, auto&& arg) -> TReturn {
 

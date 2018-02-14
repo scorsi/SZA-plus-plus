@@ -427,11 +427,11 @@ namespace zia::apipp {
         static ConfElem fromBasicConfig(const zia::api::Conf &conf);
 
         zia::api::Conf toBasicConfig();
-
-        static std::string basicPrettify(const zia::api::Conf &conf);
-
-        static std::string prettify(const ConfElem &conf);
     };
+
+    std::ostream& operator<<(std::ostream& os, ConfElem const& conf);
+
+    std::ostream& operator<<(std::ostream& os, zia::api::Conf& conf);
 
     /**
      * Alias for long long.

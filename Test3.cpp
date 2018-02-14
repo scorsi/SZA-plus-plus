@@ -87,7 +87,7 @@ void test3() {
         confArray->push(confString);
         confArray->push(ConfElem("titi"s));
 
-        auto conf2 = conf.set(ConfMap()).set_at("data", confArray);
+        auto conf2 = ConfElem().set(ConfMap()).set_at("data", confArray);
         confString->set("new_value"s);
 
         std::cout << conf2.get_at("data").get_at(0).get<std::string>() << std::endl;
@@ -105,7 +105,7 @@ void test3() {
         zia::api::ConfValue valueBool;
         valueBool.v = true;
         zia::api::ConfValue valueString;
-        valueString.v = "String Value";
+        valueString.v = "String Value"s;
         zia::api::ConfValue valueLong;
         valueLong.v = static_cast<long long int>(1785);
         zia::api::ConfValue valueDouble;
@@ -115,28 +115,22 @@ void test3() {
         zia::api::ConfValue valueArray;
         valueArray.v = std::vector<zia::api::ConfValue> { valueBool, valueString, valueLong, valueDouble };
 
-        zia::api::ConfValue valueMap;
-        valueMap.v = std::map<std::string, zia::api::ConfValue> {
+        zia::api::ConfObject valueMap;
+        valueMap = std::map<std::string, zia::api::ConfValue> {
             {"first", valueArray},
             {"second", valueBool},
             {"third", valueLong},
             {"fourth", valueString},
             {"fifth", valueDouble}
         };
-        zia::api::ConfValue root = valueMap;
-
-        zia::api::Conf confRoot { { "data", root } };
+        zia::api::Conf root = valueMap;
 
         std::cout << "TEST -- To SZA ++ Config" << std::endl;
-        auto wrappedConfig = Conf::fromBasicConfig(confRoot);
-
-        auto prettyfied = ConfElem::prettify(wrappedConfig);
-        std::cout << prettyfied << std::endl;
+        auto wrappedConfig = Conf::fromBasicConfig(root);
+        std::cout << wrappedConfig << std::endl;
 
         std::cout << "TEST -- From SZA ++ Config" << std::endl;
         auto newConfig = wrappedConfig.toBasicConfig();
-
-        auto basicprettyfied = ConfElem::basicPrettify(newConfig);
-        std::cout << basicprettyfied << std::endl;
+        std::cout << newConfig << std::endl;
     }
 }
