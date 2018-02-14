@@ -51,7 +51,55 @@ namespace zia::apipp {
         return jsonConfig;
     }
 
-    std::string ConfElem::basicPrettify(const zia::api::ConfValue &conf) {
+    zia::api::Conf ConfElem::toBasicConfig() {
+        namespace wrapped = zia::api;
+        zia::api::Conf basicConf {};
+
+        auto pvisit = make_recursive_visitor<wrapped::ConfValue>(
+            [](auto, std::monostate) { return wrapped::ConfValue(); },
+            [](auto, auto value) {
+                auto v = wrapped::ConfValue();
+                v.v = value;
+                return v;
+            },
+            [](auto, std::string const& value) {
+                auto v = wrapped::ConfValue();
+                v.v = value;
+                return v;
+            },
+            [](auto recurse, ConfArray::Sptr const& array) {
+                wrapped::ConfArray basicarray {};
+
+                for (auto&& value : array->elems)
+                    basicarray.push_back(recurse(value->getValue()));
+
+                wrapped::ConfValue value;
+                value.v = basicarray;
+                return value;
+            },
+            [](auto recurse, ConfMap::Sptr const& map) {
+                wrapped::ConfObject basicmap {};
+
+                for (auto&& value : map->elems) {
+                    basicmap.insert({value.first, recurse(value.second->getValue()) });
+                }
+
+                wrapped::ConfValue value;
+                value.v = basicmap;
+                return value;
+            }
+        );
+
+        auto root = std::visit(pvisit, value);
+        if (type == Map) {
+            return std::get<wrapped::ConfObject>(root.v);
+        }
+        else {
+            return wrapped::ConfObject { { "data", root} };
+        }
+    }
+
+    std::string ConfElem::basicPrettify(const zia::api::Conf &conf) {
         std::ostringstream os {};
         int sp {0};
 
@@ -59,23 +107,25 @@ namespace zia::apipp {
             return std::string(static_cast<std::size_t>(indent), ' ');
         };
 
+        auto mapPrettify = [&os, &sp, &indent] (auto recurse, zia::api::ConfObject value) {
+            os << "{\n";
+            sp += 4;
+            for (auto&& v : value) {
+                os << indent(sp) << std::quoted(v.first) <<  ": ";
+                recurse(v.second.v);
+                os << ",\n";
+            }
+            sp -= 4;
+            os << indent(sp) << "}";
+        };
+
+
         auto pvisit = make_recursive_visitor<void>(
             [&os] (auto, std::monostate) { },
             [&os] (auto, long long value) { os << value; },
             [&os] (auto, double value) { os << std::fixed << value; },
             [&os] (auto, bool value) { os << std::boolalpha << value; },
             [&os] (auto, const std::string & value) { os << value; },
-            [&os, &sp, &indent] (auto recurse, zia::api::ConfObject value) {
-                os << "{\n";
-                sp += 4;
-                for (auto&& v : value) {
-                    os << indent(sp) << std::quoted(v.first) <<  ": ";
-                    recurse(v.second.v);
-                    os << ",\n";
-                }
-                sp -= 4;
-                os << indent(sp) << "}";
-            },
             [&os, &sp, &indent](auto recurse, zia::api::ConfArray value) {
                 os << "[\n";
                 sp += 4;
@@ -91,10 +141,14 @@ namespace zia::apipp {
                 }
                 sp -= 4;
                 os << "\n" << indent(sp) << "]";
-            }
+            },
+            mapPrettify
         );
 
-        std::visit(pvisit, conf.v);
+        zia::api::ConfValue begin;
+        begin.v = conf;
+
+        std::visit(pvisit, begin.v);
         return os.str();
 
     }
@@ -125,7 +179,6 @@ namespace zia::apipp {
                 os << indent(sp) << "}";
             },
             [&os, &sp, &indent] (auto recurse, const ConfArray::Sptr& array) {
-                std::cout << "FOUND ARRAY" << std::endl;
                 os << "[\n";
                 sp += 4;
                 auto it = array->elems.begin();
@@ -145,5 +198,4 @@ namespace zia::apipp {
         std::visit(pvisit, conf.getValue());
         return os.str();
     }
-
 }

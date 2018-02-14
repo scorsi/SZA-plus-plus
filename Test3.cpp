@@ -127,14 +127,16 @@ void test3() {
 
         zia::api::Conf confRoot { { "data", root } };
 
-        auto basicprettyfied = ConfElem::basicPrettify(root);
-        std::cout << basicprettyfied << std::endl;
-    /// Tests conversion fromBasicConfig
+        std::cout << "TEST -- To SZA ++ Config" << std::endl;
         auto wrappedConfig = Conf::fromBasicConfig(confRoot);
 
         auto prettyfied = ConfElem::prettify(wrappedConfig);
-
         std::cout << prettyfied << std::endl;
 
+        std::cout << "TEST -- From SZA ++ Config" << std::endl;
+        auto newConfig = wrappedConfig.toBasicConfig();
+
+        auto basicprettyfied = ConfElem::basicPrettify(newConfig);
+        std::cout << basicprettyfied << std::endl;
     }
 }

@@ -426,7 +426,9 @@ namespace zia::apipp {
 
         static ConfElem fromBasicConfig(const zia::api::Conf &conf);
 
-        static std::string basicPrettify(const zia::api::ConfValue &conf);
+        zia::api::Conf toBasicConfig();
+
+        static std::string basicPrettify(const zia::api::Conf &conf);
 
         static std::string prettify(const ConfElem &conf);
     };
