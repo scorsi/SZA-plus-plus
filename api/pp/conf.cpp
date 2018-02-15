@@ -14,41 +14,7 @@ namespace zia::apipp {
 
     ConfElem::~ConfElem() = default;
 
-    ConfElem ConfElem::fromBasicConfig(const zia::api::Conf &conf) {
-
-        auto jsonConfig = ConfElem(ConfMap());
-
-        auto visitor = make_recursive_visitor<ConfElem>(
-            [](auto, std::monostate) { return ConfElem(); },
-            [](auto, auto value) { return ConfElem(value); },
-            [](auto, std::string const& value) { return ConfElem(value); },
-
-            [](auto self, zia::api::ConfObject const& map) {
-                auto currentElem = ConfElem(ConfMap());
-                for (auto& v : map)
-                {
-                    currentElem.set_at(v.first, self(v.second.v));
-                }
-                return currentElem;
-            },
-
-            [](auto self, zia::api::ConfArray const& array) {
-                auto currentElem = ConfElem(ConfArray());
-
-                for (auto& v : array) {
-                    currentElem.push(self(v.v));
-                }
-                return currentElem;
-            });
-
-        for (auto const& basicvalue : conf)
-        {
-            jsonConfig.set_at(basicvalue.first, std::visit(visitor, basicvalue.second.v));
-        }
-        return jsonConfig;
-    }
-
-    zia::api::Conf ConfElem::toBasicConfig() {
+	zia::api::Conf ConfElem::toBasicConfig() {
         namespace wrapped = zia::api;
         zia::api::Conf basicConf {};
 
@@ -99,7 +65,7 @@ namespace zia::apipp {
     std::ostream &operator<<(std::ostream &os, zia::apipp::Conf const &conf) {
         int sp {0};
 
-        constexpr auto indent = [](int indent) -> std::string {
+        auto indent = [](int indent) -> std::string {
             return std::string(static_cast<std::size_t>(indent), ' ');
         };
 
@@ -158,7 +124,7 @@ namespace zia::apipp {
     std::ostream &operator<<(std::ostream &os, zia::api::Conf const &conf) {
         int sp {0};
 
-        constexpr auto indent = [](int indent) -> std::string {
+        auto indent = [](int indent) -> std::string {
             return std::string(static_cast<std::size_t>(indent), ' ');
         };
 

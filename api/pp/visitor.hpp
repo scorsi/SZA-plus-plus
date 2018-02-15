@@ -1,16 +1,5 @@
-//
-// basic_conf.tcc for sza_plus_plus in /home/anthony/repository/sza_plus_plus/basic_conf.tcc
-//
-// Made by Anthony LECLERC
-// Login   <anthony.leclerc@epitech.eu>
-//
-// Started on  mer. févr. 14 18:22:55 2018 Anthony LECLERC
-// Last update mer. févr. 14 18:22:55 2018 Anthony LECLERC
-//
 
-#ifndef SZA_PLUS_PLUS_BASIC_CONF_TCC
-#define SZA_PLUS_PLUS_BASIC_CONF_TCC
-
+#pragma once
 /// Y-Combinator to allow infinite-recursion with lambdas.
 /// The lambda passed as parameter must take an `auto` as first parameter, which is the current
 /// function called. It allows recursion in lambdas sinc lambdas cannot be self-referenced in their scope.
@@ -29,8 +18,73 @@ private:
     F _function;
 };
 
-template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+namespace lambda_util {
+
+	namespace detail {
+
+		template <typename... lambda_ts>
+		struct composer_t;
+
+		template <typename lambda_t>
+		struct composer_t<lambda_t> : lambda_t {
+			composer_t(const lambda_t& lambda) : lambda_t{ lambda } { }
+			composer_t(lambda_t&& lambda) : lambda_t{ std::move(lambda) } { }
+
+			using lambda_t::operator();
+		};
+
+		template <typename lambda_t, typename... more_lambda_ts>
+		struct composer_t<lambda_t, more_lambda_ts...> : lambda_t, composer_t<more_lambda_ts...> {
+			using super_t = composer_t<more_lambda_ts...>;
+
+			template <typename... lambda_ts>
+			composer_t(const lambda_t& lambda, lambda_ts&&... more_lambdas) : lambda_t{ lambda }, super_t{ std::forward<lambda_ts>(more_lambdas)... } { }
+			template <typename... lambda_ts>
+			composer_t(lambda_t&& lambda, lambda_ts&&... more_lambdas) : lambda_t{ std::move(lambda) }, super_t{ std::forward<lambda_ts>(more_lambdas)... } { }
+
+			using lambda_t::operator();
+			using super_t::operator();
+		};
+
+	} // namespace detail
+
+	template <typename... lambda_ts>
+	auto compose(lambda_ts&&... lambdas) {
+		return detail::composer_t<std::decay_t<lambda_ts>...>{std::forward<lambda_ts>(lambdas)...};
+	}
+
+} // namespace lambda_util
+
+
+template<typename ...Ts>
+struct overloaded;
+
+template<typename T>
+struct overloaded<T> {
+private:
+	T _f;
+public:
+	overloaded(T&& f) : _f(std::forward<T>(f)) {}
+
+	template<typename ...Args>
+	decltype(auto) operator()(Args&& ...args) {
+		return _f(std::forward<Args>(args)...);
+	}
+};
+
+template<typename T, typename ...Ts>
+struct overloaded<T, Ts...> : overloaded<T>, overloaded<Ts...> {
+public:
+
+	overloaded(T&& f, Ts&& ...fs) : overloaded<T>(std::forward<T>(f)),
+		overloaded<Ts...>(std::forward<Ts>(fs)...)
+	{}
+
+	using overloaded<T>::operator();
+	using overloaded<Ts...>::operator();
+
+};
 
 template<typename TVisitor, typename TVariant>
 constexpr auto recursive_visit(TVisitor&& visitor, TVariant&& variant) {
@@ -42,19 +96,16 @@ constexpr auto recursive_visit(TVisitor&& visitor, TVariant&& variant) {
 };
 
 template<typename TReturn, typename ...TVisitors>
-constexpr auto make_recursive_visitor(TVisitors&& ...visitors)
-{
-    return fix([&visitors...](auto self, auto&& arg) -> TReturn {
+constexpr auto make_recursive_visitor(TVisitors&& ...visitors) {
+	auto selfRecursion = [&visitors...](auto self, auto&& arg)->TReturn {
 
-        return overloaded { std::forward<TVisitors>(visitors)... } (
-            [&self](auto&& v)
-            {
-                return recursive_visit(self, v);
-            },
-            std::forward<decltype(arg)>(arg)
-        );
-
-    });
+		return lambda_util::compose ( std::forward<TVisitors>(visitors)... ) (
+			[&self](auto&& v)
+		{
+			return recursive_visit(self, v);
+		},
+			std::forward<decltype(arg)>(arg)
+			);
+	};
+    return fix<decltype(selfRecursion)>(selfRecursion);
 }
-
-#endif /* SZA_PLUS_PLUS_BASIC_CONF_TCC */

@@ -1,9 +1,12 @@
 
-#pragma once
+//#pragma once
+#ifndef CONF_HPP
+#define CONF_HPP
 
 #include <iostream>
 #include <memory>
 #include "../conf.h"
+#include "visitor.hpp"
 
 /**
  * Wrapper of zia::api::Conf header to simplify the using.
@@ -76,6 +79,9 @@ namespace zia::apipp {
         template<typename TElem>
         struct variant_helper
         {
+			template<typename T = TElem, std::enable_if_t<std::is_same_v<T, std::monostate> >* = nullptr >
+			static Type get_type() { return Empty; }
+
             template<typename T = TElem, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<bool, T> >* = nullptr>
             static Type get_type() { return Integer; }
 
@@ -95,6 +101,11 @@ namespace zia::apipp {
 
             template<typename T = TElem, std::enable_if_t<std::is_same_v<bool, T> >* = nullptr>
             static Type get_type() { return Boolean; }
+
+			template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<U, std::monostate> >* = nullptr >
+			static void set_value(T &&value, Variant& var) {
+				var = std::monostate();
+			}
 
             template<typename T, typename U = TElem, std::enable_if_t<std::is_integral_v<U> && !std::is_same_v<bool, U> >* = nullptr>
             static void set_value(T &&value, Variant &var) {
@@ -433,7 +444,46 @@ namespace zia::apipp {
          * @param conf Basic Configuration from wrapped API.
          * @return SZA++ Configuration object.
          */
-        static ConfElem fromBasicConfig(const zia::api::Conf &conf);
+		static ConfElem fromBasicConfig(const zia::api::Conf &conf) {
+			auto jsonConfig = ConfElem(ConfMap());
+
+			auto visitor = make_recursive_visitor<ConfElem>([](auto self, auto&& value) -> ConfElem {
+				using T = std::decay_t<decltype(value)>;
+
+				if constexpr (std::is_same_v<T, std::monostate>) {
+					return ConfElem();
+				}
+				else if constexpr  (std::is_same_v<T, double> ||
+					std::is_same_v<T, long long int> ||
+					std::is_same_v<T, bool> ||
+					std::is_same_v<T, std::string>)
+				{
+					return ConfElem(value);
+				}
+				else if constexpr (std::is_same_v<T, zia::api::ConfObject>) {
+					auto currentElem = ConfElem(ConfMap());
+					for (auto& v : value)
+					{
+						currentElem.set_at(v.first, self(v.second.v));
+					}
+					return currentElem;
+				}
+				else if constexpr (std::is_same_v<T, zia::api::ConfArray>) {
+					auto currentElem = ConfElem(ConfArray());
+
+					for (auto& v : value) {
+						currentElem.push(self(v.v));
+					}
+					return currentElem;
+				}
+			});
+
+			for (auto const& basicvalue : conf)
+			{
+				jsonConfig.set_at(basicvalue.first, std::visit(visitor, basicvalue.second.v));
+			}
+			return jsonConfig;
+		}
 
         /**
          * Convert a configuration object from SZA++ format to a Conf object from the SZA Api.
@@ -482,3 +532,4 @@ namespace zia::apipp {
 
     using Conf = ConfElem;
 }
+#endif
