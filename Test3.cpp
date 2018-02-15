@@ -136,8 +136,9 @@ void test3() {
         /// Visitor used to iterate over the configuration.
         /// Use this instead of chaining "get<T>()" calls with try/catch.
         /// The first argument is the "self" lambda. Call it to continue recursion.
-        /// TODO: visit method in Conf for easier manipulation.
         std::cout << "TEST -- Visit of Conf element" << std::endl;
+
+        /// Without encapsulated visit.
         auto testVisitor = make_recursive_visitor<void>(
             [](auto, std::monostate) { std::cout << "Empty" << std::endl; },
             [](auto, std::string const &) { std::cout << "String" << std::endl; },
@@ -160,6 +161,7 @@ void test3() {
 
         std::visit(testVisitor, wrappedConfig.getValue());
 
+        /// With encapsulated visit. void is the default return type.
         wrappedConfig.visit(
             [](auto, std::monostate) { std::cout << "Empty" << std::endl; },
             [](auto, std::string const &) { std::cout << "String" << std::endl; },

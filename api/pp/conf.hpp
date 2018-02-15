@@ -1,7 +1,5 @@
 
-//#pragma once
-#ifndef CONF_HPP
-#define CONF_HPP
+#pragma once
 
 #include <iostream>
 #include <memory>
@@ -438,8 +436,16 @@ namespace zia::apipp {
             return value;
         }
 
+        /**
+         * Encapsulated std::visit call with a recursive visitor.
+         * @tparam TReturn default return type is void, must be given explicitly otherwise.
+         * @tparam TVisitors Every overload must be given. Either with functions of different arguments type,
+         * or a function with a generic parameter, and type selection with if constexpr expressions.
+         * @param visitors
+         * @return TReturn
+         */
         template<typename TReturn = void, typename ...TVisitors>
-        decltype(auto) visit(TVisitors&& ...visitors) {
+        decltype(auto) visit(TVisitors&& ...visitors) const {
             auto rec_visit = make_recursive_visitor<TReturn>(
                 std::forward<TVisitors>(visitors)...
             );
@@ -540,4 +546,3 @@ namespace zia::apipp {
 
     using Conf = ConfElem;
 }
-#endif
