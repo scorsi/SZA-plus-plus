@@ -17,7 +17,7 @@ namespace zia::apipp {
 	zia::api::Conf ConfElem::toBasicConfig() {
         namespace wrapped = zia::api;
         zia::api::Conf basicConf {};
-
+        
         auto pvisit = make_recursive_visitor<wrapped::ConfValue>(
             [](auto, std::monostate) { return wrapped::ConfValue(); },
             [](auto, auto value) {

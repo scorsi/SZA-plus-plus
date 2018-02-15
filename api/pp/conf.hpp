@@ -438,6 +438,15 @@ namespace zia::apipp {
             return value;
         }
 
+        template<typename TReturn = void, typename ...TVisitors>
+        decltype(auto) visit(TVisitors&& ...visitors) {
+            auto rec_visit = make_recursive_visitor<TReturn>(
+                std::forward<TVisitors>(visitors)...
+            );
+
+            return std::visit(rec_visit, getValue());
+        };
+
         /**
          * Convert a configuration object from the SZA api to SZA++ format.
          * @param conf Basic Configuration from wrapped API.
@@ -447,7 +456,7 @@ namespace zia::apipp {
 			auto jsonConfig = ConfElem(ConfMap());
 
 			auto visitor = make_recursive_visitor<ConfElem>([](auto self, auto&& value) -> ConfElem {
-				using T = std::decay_t<decltype(value)>;
+                using T = std::decay_t<decltype(value)>;
 
 				if constexpr (std::is_same_v<T, std::monostate>) {
 					return ConfElem();
