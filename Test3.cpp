@@ -113,15 +113,15 @@ void test3() {
 
 
         zia::api::ConfValue valueArray;
-        valueArray.v = std::vector<zia::api::ConfValue> { valueBool, valueString, valueLong, valueDouble };
+        valueArray.v = std::vector<zia::api::ConfValue> {valueBool, valueString, valueLong, valueDouble};
 
         zia::api::ConfObject valueMap;
         valueMap = std::map<std::string, zia::api::ConfValue> {
-            {"first", valueArray},
+            {"first",  valueArray},
             {"second", valueBool},
-            {"third", valueLong},
+            {"third",  valueLong},
             {"fourth", valueString},
-            {"fifth", valueDouble}
+            {"fifth",  valueDouble}
         };
         zia::api::Conf root = valueMap;
 
@@ -136,25 +136,49 @@ void test3() {
         /// Visitor used to iterate over the configuration.
         /// Use this instead of chaining "get<T>()" calls with try/catch.
         /// The first argument is the "self" lambda. Call it to continue recursion.
-        /// TODO: visit method in Conf for easier manipulation.
         std::cout << "TEST -- Visit of Conf element" << std::endl;
+
+        /// Without encapsulated visit.
         auto testVisitor = make_recursive_visitor<void>(
             [](auto, std::monostate) { std::cout << "Empty" << std::endl; },
-            [](auto, std::string const&) { std::cout << "String" << std::endl; },
+            [](auto, std::string const &) { std::cout << "String" << std::endl; },
             [](auto, long long int) { std::cout << "Long" << std::endl; },
-            [](auto, double) { std::cout << "Double" << std::endl;} ,
+            [](auto, double) { std::cout << "Double" << std::endl; },
             [](auto, bool) { std::cout << "Bool" << std::endl; },
-            [](auto recurse, ConfArray::Sptr const& array) { std::cout << "Array" << std::endl;
-                for (auto&& v : array->elems) {
+            [](auto recurse, ConfArray::Sptr const &array) {
+                std::cout << "Array" << std::endl;
+                for (auto &&v : array->elems) {
                     recurse(v->getValue());
                 }
             },
-            [](auto recurse, ConfMap::Sptr const& map) { std::cout << "Map" << std::endl;
-            for (auto&& v : map->elems) {
-                recurse(v.second->getValue());
-            }}
+            [](auto recurse, ConfMap::Sptr const &map) {
+                std::cout << "Map" << std::endl;
+                for (auto &&v : map->elems) {
+                    recurse(v.second->getValue());
+                }
+            }
         );
 
         std::visit(testVisitor, wrappedConfig.getValue());
+
+        /// With encapsulated visit. void is the default return type.
+        wrappedConfig.visit(
+            [](auto, std::monostate) { std::cout << "Empty" << std::endl; },
+            [](auto, std::string const &) { std::cout << "String" << std::endl; },
+            [](auto, long long int) { std::cout << "Long" << std::endl; },
+            [](auto, double) { std::cout << "Double" << std::endl; },
+            [](auto, bool) { std::cout << "Bool" << std::endl; },
+            [](auto recurse, ConfArray::Sptr const &array) {
+                std::cout << "Array" << std::endl;
+                for (auto &&v : array->elems) {
+                    recurse(v->getValue());
+                }
+            },
+            [](auto recurse, ConfMap::Sptr const &map) {
+                std::cout << "Map" << std::endl;
+                for (auto &&v : map->elems) {
+                    recurse(v.second->getValue());
+                }
+            });
     }
 }

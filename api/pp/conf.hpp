@@ -1,7 +1,5 @@
 
-//#pragma once
-#ifndef CONF_HPP
-#define CONF_HPP
+#pragma once
 
 #include <iostream>
 #include <memory>
@@ -439,6 +437,23 @@ namespace zia::apipp {
         }
 
         /**
+         * Encapsulated std::visit call with a recursive visitor.
+         * @tparam TReturn default return type is void, must be given explicitly otherwise.
+         * @tparam TVisitors Every overload must be given. Either with functions of different arguments type,
+         * or a function with a generic parameter, and type selection with if constexpr expressions.
+         * @param visitors
+         * @return TReturn
+         */
+        template<typename TReturn = void, typename ...TVisitors>
+        decltype(auto) visit(TVisitors&& ...visitors) const {
+            auto rec_visit = make_recursive_visitor<TReturn>(
+                std::forward<TVisitors>(visitors)...
+            );
+
+            return std::visit(rec_visit, getValue());
+        };
+
+        /**
          * Convert a configuration object from the SZA api to SZA++ format.
          * @param conf Basic Configuration from wrapped API.
          * @return SZA++ Configuration object.
@@ -447,7 +462,7 @@ namespace zia::apipp {
 			auto jsonConfig = ConfElem(ConfMap());
 
 			auto visitor = make_recursive_visitor<ConfElem>([](auto self, auto&& value) -> ConfElem {
-				using T = std::decay_t<decltype(value)>;
+                using T = std::decay_t<decltype(value)>;
 
 				if constexpr (std::is_same_v<T, std::monostate>) {
 					return ConfElem();
@@ -531,4 +546,3 @@ namespace zia::apipp {
 
     using Conf = ConfElem;
 }
-#endif
