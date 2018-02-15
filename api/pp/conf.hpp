@@ -419,19 +419,46 @@ namespace zia::apipp {
             }
         }
 
+        /**
+         * Returns the inner variant object. (used for std::visit).
+         * @return Variant type with std::monostate, long long, double, std::string,
+         * boolean, ConfArray and ConfMap types.
+         */
         const Variant &getValue() const {
             return value;
         }
 
-
+        /**
+         * Convert a configuration object from the SZA api to SZA++ format.
+         * @param conf Basic Configuration from wrapped API.
+         * @return SZA++ Configuration object.
+         */
         static ConfElem fromBasicConfig(const zia::api::Conf &conf);
 
+        /**
+         * Convert a configuration object from SZA++ format to a Conf object from the SZA Api.
+         * Since the Conf type from SZA++ is a Variant and the one from SZA Api is a map with named values, when
+         * a ConfElem is not a map element, a field "data" is added at the root to store the real data.
+         * @return
+         */
         zia::api::Conf toBasicConfig();
     };
 
-    std::ostream& operator<<(std::ostream& os, ConfElem const& conf);
+    /**
+     * Serialize a SZA++ Configuration for display/testing purposes.
+     * @param os Output stream
+     * @param conf
+     * @return
+     */
+    std::ostream& operator<<(std::ostream& os, ConfElem const &conf);
 
-    std::ostream& operator<<(std::ostream& os, zia::api::Conf& conf);
+    /**
+     * Serialize a SZA Configuration for display/testing purposes.
+     * @param os Output stream
+     * @param conf An element of the configuration.
+     * @return
+     */
+    std::ostream& operator<<(std::ostream& os, zia::api::Conf const &conf);
 
     /**
      * Alias for long long.

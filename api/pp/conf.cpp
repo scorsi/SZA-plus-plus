@@ -20,11 +20,8 @@ namespace zia::apipp {
 
         auto visitor = make_recursive_visitor<ConfElem>(
             [](auto, std::monostate) { return ConfElem(); },
-
-            [](auto, double value) { return ConfElem(value); },
-            [](auto, long long value) { return ConfElem(value); },
+            [](auto, auto value) { return ConfElem(value); },
             [](auto, std::string const& value) { return ConfElem(value); },
-            [](auto, bool value) { return ConfElem(value); },
 
             [](auto self, zia::api::ConfObject const& map) {
                 auto currentElem = ConfElem(ConfMap());
@@ -130,10 +127,11 @@ namespace zia::apipp {
                     os << indent(sp) << std::quoted(it->first) <<  ": ";
                     recurse(it->second->getValue());
                     if (it != endSep)
-                        os << ",\n";
+                        os << ',';
+                    os << '\n';
                 }
                 sp -= 4;
-                os << '\n' << indent(sp) << "}";
+                os << indent(sp) << "}";
             }
             else if constexpr (std::is_same_v<T, ConfArray::Sptr>) {
                 os << '[';
@@ -146,17 +144,18 @@ namespace zia::apipp {
                     os << indent(sp);
                     recurse((*it)->getValue());
                     if (it != end - 1)
-                        os << ",\n";
+                        os << ',';
+                    os << '\n';
                 }
                 sp -= 4;
-                os << "\n" << indent(sp) << "]";
+                os << indent(sp) << "]";
             }
         });
         std::visit(pvisit, conf.getValue());
         return os;
     }
 
-    std::ostream &operator<<(std::ostream &os, zia::api::Conf &conf) {
+    std::ostream &operator<<(std::ostream &os, zia::api::Conf const &conf) {
         int sp {0};
 
         constexpr auto indent = [](int indent) -> std::string {
@@ -172,10 +171,11 @@ namespace zia::apipp {
                 os << indent(sp) << std::quoted(it->first) <<  ": ";
                 recurse(it->second.v);
                 if (it != endSep)
-                    os << ",\n";
+                    os << ',';
+                os << '\n';
             }
             sp -= 4;
-            os << '\n' << indent(sp) << "}";
+            os << indent(sp) << "}";
         };
 
         auto pvisit = make_recursive_visitor<void>(
@@ -195,10 +195,11 @@ namespace zia::apipp {
                     os << indent(sp);
                     recurse(it->v);
                     if (it != end - 1)
-                        os << ",\n";
+                        os << ',';
+                    os << '\n';
                 }
                 sp -= 4;
-                os << '\n' << indent(sp) << ']';
+                os << indent(sp) << ']';
             },
             mapPrettify
         );
