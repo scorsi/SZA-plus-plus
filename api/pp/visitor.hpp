@@ -86,11 +86,11 @@ constexpr auto make_recursive_visitor(TVisitors&& ...visitors) {
 
 		return detail::compose ( std::forward<TVisitors>(visitors)... ) (
 			[&self](auto&& v)
-		{
-			return recursive_visit(self, v);
-		},
-			std::forward<decltype(arg)>(arg)
-			);
-	};
+            {
+                return recursive_visit(self, v);
+            },
+            std::forward<decltype(arg)>(arg)
+        );
+    };
     return fix<decltype(selfRecursion)>(selfRecursion);
 }

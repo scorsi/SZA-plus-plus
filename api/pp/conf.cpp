@@ -18,7 +18,7 @@ namespace zia::apipp {
         namespace wrapped = zia::api;
         zia::api::Conf basicConf {};
 
-        auto pvisit = make_recursive_visitor<wrapped::ConfValue>(
+        auto root = visit<wrapped::ConfValue>(
             [](auto, std::monostate) { return wrapped::ConfValue(); },
             [](auto, auto value) {
                 auto v = wrapped::ConfValue();
@@ -39,7 +39,7 @@ namespace zia::apipp {
                 wrapped::ConfValue value;
                 value.v = basicarray;
                 return value;
-            },
+                                                          },
             [](auto recurse, ConfMap::Sptr const& map) {
                 wrapped::ConfObject basicmap {};
 
@@ -50,10 +50,8 @@ namespace zia::apipp {
                 wrapped::ConfValue value;
                 value.v = basicmap;
                 return value;
-            }
-        );
+            });
 
-        auto root = std::visit(pvisit, value);
         if (type == Map) {
             return std::get<wrapped::ConfObject>(root.v);
         }
@@ -69,7 +67,7 @@ namespace zia::apipp {
             return std::string(static_cast<std::size_t>(indent), ' ');
         };
 
-        auto pvisit = make_recursive_visitor<void>( [&os, &sp, &indent](auto recurse, auto&& value) {
+        conf.visit<void>([&os, &sp, &indent](auto recurse, auto&& value) {
             using T = std::decay_t<decltype(value)>;
             if constexpr (std::is_same_v<T, std::monostate>) {}
             else if constexpr (std::is_same_v<T, long long>) {
@@ -117,7 +115,6 @@ namespace zia::apipp {
                 os << indent(sp) << "]";
             }
         });
-        std::visit(pvisit, conf.getValue());
         return os;
     }
 
