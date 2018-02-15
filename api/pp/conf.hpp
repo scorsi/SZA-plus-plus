@@ -1,9 +1,12 @@
 
-#pragma once
+//#pragma once
+#ifndef CONF_HPP
+#define CONF_HPP
 
 #include <iostream>
 #include <memory>
 #include "../conf.h"
+#include "visitor.hpp"
 
 /**
  * Wrapper of zia::api::Conf header to simplify the using.
@@ -76,6 +79,9 @@ namespace zia::apipp {
         template<typename TElem>
         struct variant_helper
         {
+			template<typename T = TElem, std::enable_if_t<std::is_same_v<T, std::monostate> >* = nullptr >
+			static Type get_type() { return Empty; }
+
             template<typename T = TElem, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<bool, T> >* = nullptr>
             static Type get_type() { return Integer; }
 
@@ -95,6 +101,11 @@ namespace zia::apipp {
 
             template<typename T = TElem, std::enable_if_t<std::is_same_v<bool, T> >* = nullptr>
             static Type get_type() { return Boolean; }
+
+			template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<U, std::monostate> >* = nullptr >
+			static void set_value(T &&value, Variant& var) {
+				var = std::monostate();
+			}
 
             template<typename T, typename U = TElem, std::enable_if_t<std::is_integral_v<U> && !std::is_same_v<bool, U> >* = nullptr>
             static void set_value(T &&value, Variant &var) {
@@ -118,7 +129,7 @@ namespace zia::apipp {
                 var = std::make_shared<TElem>(std::forward<TElem>(value));
             };
 
-            template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<bool, T> >* = nullptr>
+            template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<bool, U> >* = nullptr>
             static void set_value(T &&value, Variant &var) {
                 var = value;
             };
@@ -181,7 +192,6 @@ namespace zia::apipp {
         ConfElem &get_at(const std::string &index) {
             return (*this)[index];
         }
-
 
         const ConfElem &get_at(const std::string &index) const {
             return (*this)[index];
@@ -419,11 +429,85 @@ namespace zia::apipp {
             }
         }
 
-
-        static ConfElem fromBasicConfig(const zia::api::Conf &conf) {
-            return {};
+        /**
+         * Returns the inner variant object. (used for std::visit).
+         * @return Variant type with std::monostate, long long, double, std::string,
+         * boolean, ConfArray and ConfMap types.
+         */
+        const Variant &getValue() const {
+            return value;
         }
+
+        /**
+         * Convert a configuration object from the SZA api to SZA++ format.
+         * @param conf Basic Configuration from wrapped API.
+         * @return SZA++ Configuration object.
+         */
+		static ConfElem fromBasicConfig(const zia::api::Conf &conf) {
+			auto jsonConfig = ConfElem(ConfMap());
+
+			auto visitor = make_recursive_visitor<ConfElem>([](auto self, auto&& value) -> ConfElem {
+				using T = std::decay_t<decltype(value)>;
+
+				if constexpr (std::is_same_v<T, std::monostate>) {
+					return ConfElem();
+				}
+				else if constexpr  (std::is_same_v<T, double> ||
+					std::is_same_v<T, long long int> ||
+					std::is_same_v<T, bool> ||
+					std::is_same_v<T, std::string>)
+				{
+					return ConfElem(value);
+				}
+				else if constexpr (std::is_same_v<T, zia::api::ConfObject>) {
+					auto currentElem = ConfElem(ConfMap());
+					for (auto& v : value)
+					{
+						currentElem.set_at(v.first, self(v.second.v));
+					}
+					return currentElem;
+				}
+				else if constexpr (std::is_same_v<T, zia::api::ConfArray>) {
+					auto currentElem = ConfElem(ConfArray());
+
+					for (auto& v : value) {
+						currentElem.push(self(v.v));
+					}
+					return currentElem;
+				}
+			});
+
+			for (auto const& basicvalue : conf)
+			{
+				jsonConfig.set_at(basicvalue.first, std::visit(visitor, basicvalue.second.v));
+			}
+			return jsonConfig;
+		}
+
+        /**
+         * Convert a configuration object from SZA++ format to a Conf object from the SZA Api.
+         * Since the Conf type from SZA++ is a Variant and the one from SZA Api is a map with named values, when
+         * a ConfElem is not a map element, a field "data" is added at the root to store the real data.
+         * @return
+         */
+        zia::api::Conf toBasicConfig();
     };
+
+    /**
+     * Serialize a SZA++ Configuration for display/testing purposes.
+     * @param os Output stream
+     * @param conf
+     * @return
+     */
+    std::ostream& operator<<(std::ostream& os, ConfElem const &conf);
+
+    /**
+     * Serialize a SZA Configuration for display/testing purposes.
+     * @param os Output stream
+     * @param conf An element of the configuration.
+     * @return
+     */
+    std::ostream& operator<<(std::ostream& os, zia::api::Conf const &conf);
 
     /**
      * Alias for long long.
@@ -447,3 +531,4 @@ namespace zia::apipp {
 
     using Conf = ConfElem;
 }
+#endif

@@ -3,6 +3,7 @@
 //
 
 #include "api/pp/conf.hpp"
+#include "api/pp/visitor.hpp"
 
 using namespace std::literals::string_literals;
 
@@ -86,7 +87,7 @@ void test3() {
         confArray->push(confString);
         confArray->push(ConfElem("titi"s));
 
-        auto conf2 = conf.set(ConfMap()).set_at("data", confArray);
+        auto conf2 = ConfElem().set(ConfMap()).set_at("data", confArray);
         confString->set("new_value"s);
 
         std::cout << conf2.get_at("data").get_at(0).get<std::string>() << std::endl;
@@ -99,5 +100,61 @@ void test3() {
         std::cout << conf2.get_at("data").get_at("first").get<std::string>() << std::endl;
     }
 
-//    auto conftest = ConfElem(42);
+    /// Test prettify
+    {
+        zia::api::ConfValue valueBool;
+        valueBool.v = true;
+        zia::api::ConfValue valueString;
+        valueString.v = "String Value"s;
+        zia::api::ConfValue valueLong;
+        valueLong.v = static_cast<long long int>(1785);
+        zia::api::ConfValue valueDouble;
+        valueDouble.v = 42.42;
+
+
+        zia::api::ConfValue valueArray;
+        valueArray.v = std::vector<zia::api::ConfValue> { valueBool, valueString, valueLong, valueDouble };
+
+        zia::api::ConfObject valueMap;
+        valueMap = std::map<std::string, zia::api::ConfValue> {
+            {"first", valueArray},
+            {"second", valueBool},
+            {"third", valueLong},
+            {"fourth", valueString},
+            {"fifth", valueDouble}
+        };
+        zia::api::Conf root = valueMap;
+
+        std::cout << "TEST -- To SZA ++ Config" << std::endl;
+        auto wrappedConfig = Conf::fromBasicConfig(root);
+        std::cout << wrappedConfig << std::endl;
+
+        std::cout << "TEST -- From SZA ++ Config" << std::endl;
+        auto newConfig = wrappedConfig.toBasicConfig();
+        std::cout << newConfig << std::endl;
+
+        /// Visitor used to iterate over the configuration.
+        /// Use this instead of chaining "get<T>()" calls with try/catch.
+        /// The first argument is the "self" lambda. Call it to continue recursion.
+        /// TODO: visit method in Conf for easier manipulation.
+        std::cout << "TEST -- Visit of Conf element" << std::endl;
+        auto testVisitor = make_recursive_visitor<void>(
+            [](auto, std::monostate) { std::cout << "Empty" << std::endl; },
+            [](auto, std::string const&) { std::cout << "String" << std::endl; },
+            [](auto, long long int) { std::cout << "Long" << std::endl; },
+            [](auto, double) { std::cout << "Double" << std::endl;} ,
+            [](auto, bool) { std::cout << "Bool" << std::endl; },
+            [](auto recurse, ConfArray::Sptr const& array) { std::cout << "Array" << std::endl;
+                for (auto&& v : array->elems) {
+                    recurse(v->getValue());
+                }
+            },
+            [](auto recurse, ConfMap::Sptr const& map) { std::cout << "Map" << std::endl;
+            for (auto&& v : map->elems) {
+                recurse(v.second->getValue());
+            }}
+        );
+
+        std::visit(testVisitor, wrappedConfig.getValue());
+    }
 }
