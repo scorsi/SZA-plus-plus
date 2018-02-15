@@ -193,7 +193,6 @@ namespace zia::apipp {
             return (*this)[index];
         }
 
-
         const ConfElem &get_at(const std::string &index) const {
             return (*this)[index];
         }
