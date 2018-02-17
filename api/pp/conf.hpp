@@ -157,7 +157,7 @@ namespace zia::apipp {
          */
 
         template<typename T, std::enable_if_t<!isThisType<T, ConfElem>()> * = nullptr>
-        explicit ConfElem(T&& v) : type(variant_helper<std::decay_t<T>>::get_type()), value() {
+        ConfElem(T&& v) : type(variant_helper<std::decay_t<T>>::get_type()), value() {
             variant_helper<std::decay_t<T> >::set_value(std::forward<T>(v), value);
         }
 
