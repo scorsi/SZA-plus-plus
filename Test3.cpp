@@ -9,18 +9,21 @@ using namespace std::literals::string_literals;
 
 using namespace zia::apipp;
 void test3() {
+
+    /// Don't need ConfElem explicit constructor call when setting values,
+    /// But still need it when manipulating values afterwards (for ConfMap and
+    /// ConfArray for example).
     auto conf = ConfElem()
         .set(ConfMap())
-        .set_at("string_test", ConfElem().set("first_value"s))
-        .set_at("integer_test", ConfElem().set(42))
-        .set_at("double_test", ConfElem().set(42.42))
-        .set_at("nested_map_test", ConfElem()
-            .set(ConfMap())
-            .set_at("op", ConfElem().set(1)))
+        .set_at("string_test", "first_value"s)
+        .set_at("integer_test", 42)
+        .set_at("double_test", 42.42)
+        .set_at("nested_map_test", ConfElem(ConfMap())
+            .set_at("op", 1))
         .set_at("array_test",
-                ConfElem().set(ConfArray())
-                    .push(ConfElem().set(true))
-                    .push(ConfElem().set(false)));
+                ConfElem(ConfArray())
+                    .push(true)
+                    .push(false));
 
     std::cout << conf.get_at("string_test").get<std::string>() << std::endl;
     std::cout << conf.get_at("integer_test").get<int>() << std::endl;
@@ -34,6 +37,8 @@ void test3() {
     std::cout << conf.get_at("array_test").get_at(1).get<bool>() << std::endl;
 
     std::cout << conf["array_test"][0].get<bool>() << std::endl;
+
+    std::cout << conf << std::endl;
 
     /// Test with copy
     {
@@ -52,7 +57,7 @@ void test3() {
         /// Copy a previous config object but doesn't keep references.
         auto conf2 = conf;
         conf2.set(ConfMap()).set_at("data", conf3);
-        conf2.set_at("string_test", ConfElem().set("in_copied_map."s));
+        conf2.set_at("string_test", "in_copied_map."s);
 
         conf4->set("new_value"s);
 
@@ -85,7 +90,7 @@ void test3() {
         std::cout << "ConfDouble Type: " << confDouble->getType() << std::endl;
 
         confArray->push(confString);
-        confArray->push(ConfElem("titi"s));
+        confArray->push("titi"s);
 
         auto conf2 = ConfElem().set(ConfMap()).set_at("data", confArray);
         confString->set("new_value"s);
@@ -93,8 +98,8 @@ void test3() {
         std::cout << conf2.get_at("data").get_at(0).get<std::string>() << std::endl;
         std::cout << conf2.get_at("data").get_at(1).get<std::string>() << std::endl;
 
-        confMap->set_at("first", ConfElem("Value1"s));
-        confMap->set_at("second", ConfElem("Value2"s));
+        confMap->set_at("first", "Value1"s);
+        confMap->set_at("second", "Value2"s);
 
         conf2.set_at("data", confMap);
         std::cout << conf2.get_at("data").get_at("first").get<std::string>() << std::endl;
