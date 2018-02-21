@@ -23,8 +23,8 @@ namespace zia::apipp {
         const std::string uri;
         const zia::api::Net::Raw inputRawData{}; // Shouldn't be modified
 
-        Request(const zia::api::http::Version version, const zia::api::http::Method method, std::string &&uri)
-                : version{version}, method{method}, uri(std::forward<std::string>(uri)) {}
+        Request(const zia::api::http::Version version, const zia::api::http::Method method, const std::string &uri)
+                : version{version}, method{method}, uri(uri) {}
 
         explicit Request(const zia::api::HttpDuplex &duplex)
                 : version{duplex.req.version}, rawBody{duplex.req.body},

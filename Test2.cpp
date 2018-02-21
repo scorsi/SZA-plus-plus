@@ -81,9 +81,10 @@ void test2() {
 
     auto net = zia::api::NetInfo();
     // We create a false request
+    std::string uri = "/test";
     zia::apipp::RequestPtr request = std::make_shared<zia::apipp::Request>(zia::api::http::Version::http_1_1,
                                                                            zia::api::http::Method::get,
-                                                                           "/test");
+                                                                           uri);
 
     // We create the response based on the request
     zia::apipp::ResponsePtr response = std::make_shared<zia::apipp::Response>(*request);
