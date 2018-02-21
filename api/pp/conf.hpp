@@ -118,7 +118,7 @@ namespace zia::apipp {
             template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<std::string, U> > * = nullptr>
             static void set_value(T &&value, Variant &var)
             {
-                var = std::move(value);
+                var = std::forward<T>(value);
             };
 
             template<typename T, typename U = TElem, std::enable_if_t<std::is_same_v<ConfArray, U>
@@ -355,7 +355,7 @@ namespace zia::apipp {
          *
          * @return
          */
-        ConfElem::Type getType() {
+        ConfElem::Type getType() const {
             return type;
         }
 

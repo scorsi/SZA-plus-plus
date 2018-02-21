@@ -83,19 +83,24 @@ namespace zia::apipp {
                 os << std::quoted(value);
             }
             else if constexpr (std::is_same_v<T, ConfMap::Sptr>) {
-                os << "{";
-                sp += 4;
-                for (auto endSep = --value->elems.end(), it = value->elems.begin(); it != value->elems.end() ; ++it) {
-                    if (it == value->elems.begin())
-                        os << '\n';
-                    os << indent(sp) << std::quoted(it->first) <<  ": ";
-                    recurse(it->second->getValue());
-                    if (it != endSep)
-                        os << ',';
+              os << "{";
+              sp += 4;
+              auto it = value->elems.begin();
+              auto end = value->elems.end();
+              if (it != end)
+              {
+                for (auto endSep = --value->elems.end(); it != end ; ++it) {
+                  if (it == value->elems.begin())
                     os << '\n';
+                  os << indent(sp) << std::quoted(it->first) <<  ": ";
+                  recurse(it->second->getValue());
+                  if (it != endSep)
+                    os << ',';
+                  os << '\n';
                 }
-                sp -= 4;
-                os << indent(sp) << "}";
+              }
+              sp -= 4;
+              os << indent(sp) << "}";
             }
             else if constexpr (std::is_same_v<T, ConfArray::Sptr>) {
                 os << '[';
@@ -126,19 +131,23 @@ namespace zia::apipp {
         };
 
         auto mapPrettify = [&os, &sp, &indent] (auto recurse, zia::api::ConfObject value) {
-            os << "{";
-            sp += 4;
-            for (auto endSep = --value.end(), it = value.begin(); it != value.end() ; ++it) {
-                if (it == value.begin())
-                    os << '\n';
-                os << indent(sp) << std::quoted(it->first) <<  ": ";
-                recurse(it->second.v);
-                if (it != endSep)
-                    os << ',';
+          os << "{";
+          sp += 4;
+          auto it = value.begin();
+          if (it != value.end())
+          {
+            for (auto endSep = --value.end(); it != value.end() ; ++it) {
+              if (it == value.begin())
                 os << '\n';
+              os << indent(sp) << std::quoted(it->first) <<  ": ";
+              recurse(it->second.v);
+              if (it != endSep)
+                os << ',';
+              os << '\n';
             }
-            sp -= 4;
-            os << indent(sp) << "}";
+          }
+          sp -= 4;
+          os << indent(sp) << "}";
         };
 
         auto pvisit = make_recursive_visitor<void>(
