@@ -25,11 +25,3 @@ namespace zia::api {
         virtual bool exec(HttpDuplex& http) = 0;
     };
 }
-
-enum ModuleType: int {
-    Unknown = -1,
-    Module = 0,
-    Network = 1
-};
-
-extern "C" ModuleType type();
