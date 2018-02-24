@@ -32,11 +32,11 @@ namespace zia::apipp {
                   inputRawData{duplex.raw_req} {
 
             // Transform raw data to standard data
-            std::transform(duplex.resp.body.begin(), duplex.resp.body.end(), std::back_inserter(this->body),
+            std::transform(duplex.req.body.begin(), duplex.req.body.end(), std::back_inserter(this->body),
                            [](auto c) { return static_cast<char>(c); });
 
             // Transform basic map<string, string> to map<string, vector<string>>
-            for (const auto &item : duplex.resp.headers) {
+            for (const auto &item : duplex.req.headers) {
                 std::stringstream ss(item.second);
                 std::string res;
                 while (std::getline(ss, res, ',')) {
