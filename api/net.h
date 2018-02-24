@@ -1,5 +1,6 @@
 #pragma once
 
+#include "conf.h"
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -51,6 +52,12 @@ namespace zia::api {
         using Callback = std::function<void(Raw, NetInfo)>;
 
         virtual ~Net() = default;
+
+        /**
+        * Called after contruct and when config changed.
+        * \return true on success, otherwise false.
+        */
+        virtual bool config(const Conf& conf) = 0;
 
         /**
         * Launch the server asynchronously, callback will be called when a request is received.
